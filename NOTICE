@@ -1,0 +1,6 @@
+Copyright 2026 FacebookGoodies contributors.
+
+The repository includes the Xposed Framework API 82 compile-time JAR under
+app/libs/xposed-api-82.jar. It is licensed under the Apache License, Version
+2.0, remains the work of its upstream contributors, and is not bundled into
+the generated module APK. See THIRD-PARTY-NOTICES.md.

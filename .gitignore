@@ -1,0 +1,8 @@
+.gradle/
+**/build/
+.idea/
+local.properties
+*.iml
+*.log
+Thumbs.db
+device-verification*.json
