@@ -13,6 +13,9 @@ final class HostState {
     volatile boolean supported;
     final AtomicInteger hooks = new AtomicInteger();
     final AtomicInteger ads = new AtomicInteger();
+    final AtomicInteger videoHooks = new AtomicInteger();
+    final AtomicInteger reelsAds = new AtomicInteger();
+    final AtomicInteger videoAds = new AtomicInteger();
     final AtomicInteger suggestions = new AtomicInteger();
     final AtomicInteger cacheCalls = new AtomicInteger();
     final AtomicInteger renderCalls = new AtomicInteger();
@@ -34,6 +37,7 @@ final class HostState {
     }
     private Bundle snapshot() {
         Bundle out = new Bundle(); out.putBoolean("supported", supported);
+        out.putInt("videoHooks", videoHooks.get()); out.putInt("reelsAds", reelsAds.get()); out.putInt("videoAds", videoAds.get());
         out.putInt("hooks", hooks.get()); out.putInt("ads", ads.get()); out.putInt("suggestions", suggestions.get()); out.putInt("reads", reads.get());
         out.putInt("cacheCalls", cacheCalls.get()); out.putInt("renderCalls", renderCalls.get());
         out.putInt("cacheRemoved", cacheRemoved.get()); out.putInt("renderRemoved", renderRemoved.get());
@@ -44,4 +48,10 @@ final class HostState {
         if (action == FilterPolicy.Action.SUGGESTION) suggestions.incrementAndGet();
     }
     void failure(String point) { errors.incrementAndGet(); XposedBridge.log("FacebookGoodies: failed hook " + point); }
+    void videoAdFiltered(VideoAdPolicy.Surface surface) {
+        if (surface == VideoAdPolicy.Surface.NONE) return;
+        ads.incrementAndGet();
+        if (surface == VideoAdPolicy.Surface.REELS) reelsAds.incrementAndGet();
+        else videoAds.incrementAndGet();
+    }
 }

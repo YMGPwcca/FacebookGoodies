@@ -207,6 +207,9 @@ public final class SettingsActivity extends Activity {
         diagnostics.addView(reportTime, size(-1, -2));
         addCounter("hooks", R.string.diagnostic_hooks);
         addCounter("ads", R.string.diagnostic_ads);
+        addCounter("videoHooks", R.string.diagnostic_video_hooks);
+        addCounter("reelsAds", R.string.diagnostic_reels_ads);
+        addCounter("videoAds", R.string.diagnostic_video_ads);
         addCounter("suggestions", R.string.diagnostic_suggestions);
         addCounter("reads", R.string.diagnostic_reads);
         addCounter("captures", R.string.diagnostic_captures);
