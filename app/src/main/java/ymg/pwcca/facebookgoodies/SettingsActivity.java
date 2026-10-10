@@ -82,6 +82,14 @@ public final class SettingsActivity extends Activity {
         addSetting(feed, "ads", R.string.block_sponsored_posts, R.string.block_sponsored_posts_description);
         addDivider(feed);
         addSetting(feed, "suggestions", R.string.hide_facebook_suggestions, R.string.hide_facebook_suggestions_description);
+        LinearLayout feedContent = addGroup(R.string.section_content);
+        addSetting(feedContent, "hide_threads", R.string.hide_threads, R.string.hide_threads_description, false);
+        addDivider(feedContent);
+        addSetting(feedContent, "hide_stories_top", R.string.hide_stories_top, R.string.hide_stories_top_description, false);
+        addDivider(feedContent);
+        addSetting(feedContent, "hide_stories_middle", R.string.hide_stories_middle, R.string.hide_stories_middle_description, false);
+        addDivider(feedContent);
+        addSetting(feedContent, "hide_reels", R.string.hide_reels, R.string.hide_reels_description, false);
         LinearLayout privacy = addGroup(R.string.section_privacy);
         addSetting(privacy, "receipts", R.string.suppress_read_receipts, R.string.suppress_read_receipts_description);
         addDivider(privacy);
@@ -147,6 +155,10 @@ public final class SettingsActivity extends Activity {
     }
 
     private void addSetting(LinearLayout group, String key, int titleResource, int descriptionResource) {
+        addSetting(group, key, titleResource, descriptionResource, true);
+    }
+
+    private void addSetting(LinearLayout group, String key, int titleResource, int descriptionResource, boolean defaultValue) {
         String title = getString(titleResource);
         String description = getString(descriptionResource);
         LinearLayout row = new LinearLayout(this);
@@ -172,7 +184,7 @@ public final class SettingsActivity extends Activity {
         int[][] states = { { android.R.attr.state_checked }, {} };
         toggle.setThumbTintList(new ColorStateList(states, new int[] { accentColor, getColor(R.color.control_off_thumb) }));
         toggle.setTrackTintList(new ColorStateList(states, new int[] { accentColor, getColor(R.color.control_off_track) }));
-        toggle.setChecked(prefs.getBoolean(key, true));
+        toggle.setChecked(prefs.getBoolean(key, defaultValue));
         toggle.setOnCheckedChangeListener((button, enabled) -> prefs.edit().putBoolean(key, enabled).apply());
         LinearLayout.LayoutParams toggleParams = size(-2, 48);
         toggleParams.setMarginStart(dp(12));
@@ -210,6 +222,11 @@ public final class SettingsActivity extends Activity {
         addCounter("videoHooks", R.string.diagnostic_video_hooks);
         addCounter("reelsAds", R.string.diagnostic_reels_ads);
         addCounter("videoAds", R.string.diagnostic_video_ads);
+        addCounter("contentHooks", R.string.diagnostic_content_hooks);
+        addCounter("threads", R.string.diagnostic_threads);
+        addCounter("storiesTop", R.string.diagnostic_stories_top);
+        addCounter("storiesMiddle", R.string.diagnostic_stories_middle);
+        addCounter("reels", R.string.diagnostic_reels_content);
         addCounter("suggestions", R.string.diagnostic_suggestions);
         addCounter("reads", R.string.diagnostic_reads);
         addCounter("captures", R.string.diagnostic_captures);

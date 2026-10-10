@@ -23,7 +23,7 @@ final class AdHooks {
         XposedBridge.hookMethod(method, new XC_MethodHook() {
             @Override protected void beforeHookedMethod(MethodHookParam param) {
                 Options options = state.options;
-                if (!options.ads && !options.suggestions) return;
+                if (!options.hasFeedFilters()) return;
                 for (Object value : param.args) {
                     FilterPolicy.Action action = classifier.decide(value, null, options);
                     if (action == FilterPolicy.Action.KEEP) continue;
@@ -37,7 +37,7 @@ final class AdHooks {
         java.util.Set<XC_MethodHook.Unhook> added = XposedBridge.hookAllMethods(tree, name, new XC_MethodHook() {
             @Override protected void afterHookedMethod(MethodHookParam param) {
                 Options options = state.options;
-                if ((!options.ads && !options.suggestions) || param.hasThrowable()) return;
+                if (!options.hasFeedFilters() || param.hasThrowable()) return;
                 Object original = param.getResult();
                 Object filtered = collections.filter(original, ((Method) param.method).getReturnType(), options, false);
                 if (filtered != original) param.setResult(filtered);

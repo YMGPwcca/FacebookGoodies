@@ -8,11 +8,19 @@ final class Options {
     final boolean suggestions;
     final boolean receipts;
     final boolean capture;
+    final ContentFilters content;
     Options(boolean ads, boolean suggestions, boolean receipts, boolean capture) {
-        this.ads = ads; this.suggestions = suggestions; this.receipts = receipts; this.capture = capture;
+        this(ads, suggestions, receipts, capture, ContentFilters.OFF);
     }
+    Options(boolean ads, boolean suggestions, boolean receipts, boolean capture, ContentFilters content) {
+        this.ads = ads; this.suggestions = suggestions; this.receipts = receipts; this.capture = capture;
+        this.content = content;
+    }
+    boolean hasFeedFilters() { return ads || suggestions || content.hasFeedRules(); }
     static Options from(Bundle values) {
         if (values == null) return OFF;
-        return new Options(values.getBoolean("ads"), values.getBoolean("suggestions"), values.getBoolean("receipts"), values.getBoolean("capture"));
+        ContentFilters content = new ContentFilters(values.getBoolean("hide_threads"),
+                values.getBoolean("hide_stories_top"), values.getBoolean("hide_stories_middle"), values.getBoolean("hide_reels"));
+        return new Options(values.getBoolean("ads"), values.getBoolean("suggestions"), values.getBoolean("receipts"), values.getBoolean("capture"), content);
     }
 }

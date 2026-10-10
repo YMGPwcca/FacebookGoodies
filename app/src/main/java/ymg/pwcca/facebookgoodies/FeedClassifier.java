@@ -36,7 +36,7 @@ final class FeedClassifier {
     FilterPolicy.Action decide(Object primary, Object child, Options options) {
         String category = categoryOf(primary);
         boolean sponsored = sponsored(primary) || sponsored(child);
-        return FilterPolicy.decide(category, sponsored, options.ads, options.suggestions);
+        return FilterPolicy.decide(category, sponsored, options.ads, options.suggestions, options.content);
     }
     private String categoryOf(Object value) {
         if (value == null) return null;

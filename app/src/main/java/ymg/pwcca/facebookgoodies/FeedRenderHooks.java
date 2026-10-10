@@ -33,7 +33,7 @@ final class FeedRenderHooks {
             @Override protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 state.renderCalls.incrementAndGet();
                 Options options = state.options;
-                if (!options.ads && !options.suggestions) return;
+                if (!options.hasFeedFilters()) return;
                 Object row = wrapped == null ? param.thisObject : wrapped.get(param.thisObject);
                 if (!component.isInstance(row)) return;
                 FilterPolicy.Action action = classifier.decide(primary.get(row), child.get(row), options);

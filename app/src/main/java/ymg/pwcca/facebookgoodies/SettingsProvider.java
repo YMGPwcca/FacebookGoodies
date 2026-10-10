@@ -13,7 +13,7 @@ import java.util.Arrays;
 public final class SettingsProvider extends ContentProvider {
     static final Uri URI = Uri.parse("content://ymg.pwcca.facebookgoodies.settings");
     static final String PREFS = "controls";
-    private static final String[] COUNTERS = {"hooks", "ads", "suggestions", "reads", "captures", "errors", "starts", "pid", "cacheCalls", "renderCalls", "cacheRemoved", "renderRemoved", "videoHooks", "reelsAds", "videoAds"};
+    private static final String[] COUNTERS = {"hooks", "ads", "suggestions", "reads", "captures", "errors", "starts", "pid", "cacheCalls", "renderCalls", "cacheRemoved", "renderRemoved", "videoHooks", "reelsAds", "videoAds", "contentHooks", "threads", "storiesTop", "storiesMiddle", "reels"};
     @Override public boolean onCreate() { return true; }
     private boolean isFacebook(int uid) {
         String[] names = getContext().getPackageManager().getPackagesForUid(uid);
@@ -35,6 +35,8 @@ public final class SettingsProvider extends ContentProvider {
         out.putBoolean("suggestions", prefs.getBoolean("suggestions", true));
         out.putBoolean("receipts", prefs.getBoolean("receipts", true));
         out.putBoolean("capture", prefs.getBoolean("capture", true));
+        for (String key : new String[]{"hide_threads", "hide_stories_top", "hide_stories_middle", "hide_reels"})
+            out.putBoolean(key, prefs.getBoolean(key, false));
         return out;
     }
     private Bundle acceptReport(int uid, Bundle data) {

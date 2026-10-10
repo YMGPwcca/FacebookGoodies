@@ -40,7 +40,7 @@ final class FeedCacheHooks {
             @Override protected void beforeHookedMethod(MethodHookParam param) {
                 state.cacheCalls.incrementAndGet();
                 Options options = state.options;
-                if (!options.ads && !options.suggestions) return;
+                if (!options.hasFeedFilters()) return;
                 param.args[index] = collections.filter(param.args[index], method.getParameterTypes()[index], options, true);
             }
         });
