@@ -4,7 +4,8 @@ An LSPosed module for a cleaner Facebook feed.
 
 ## Features
 
-- Hide sponsored News Feed posts.
+- Hide sponsored posts and videos in News Feed, Reels and Video feeds.
+- Suppress supported video ad breaks and Reels banners.
 - Hide suggested posts and People You May Know.
 - Hide read receipts in Facebook chats.
 - Block supported screenshot-detection signals.
