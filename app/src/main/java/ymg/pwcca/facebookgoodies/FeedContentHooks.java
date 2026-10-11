@@ -12,6 +12,7 @@ final class FeedContentHooks {
         topTray(loader, "A00", "X.1rX", state);
         topTray(loader, "A01", "X.4SI", state);
         inlineStories(loader, state);
+        ThreadsVideoHooks.install(loader,state);
     }
 
     private static void topTray(ClassLoader loader, String name, String resultName, HostState state) {

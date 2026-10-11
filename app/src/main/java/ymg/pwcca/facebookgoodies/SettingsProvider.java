@@ -46,7 +46,7 @@ public final class SettingsProvider extends ContentProvider {
         for (String name : COUNTERS)
             edit.putInt(name, Math.max(0, data.getInt(name)));
         edit.putBoolean("supported", data.getBoolean("supported"));
-        for (String name : new String[]{"downloadHooks", "downloads", "downloadFailures", "downloadStage", "downloadError", "downloadSidebarRows", "muxStage", "muxError", "videoCodec", "videoWidth", "videoHeight", "audioCodec", "lastMuxFailureStage", "lastMuxFailureError", "lastMuxFailureVideoCodec", "lastMuxFailureAudioCodec", "videoContainer", "audioContainer", "portableStage", "portableError"})
+        for (String name : new String[]{"threadsVideo", "downloadHooks", "downloads", "downloadFailures", "downloadStage", "downloadError", "downloadSidebarRows", "muxStage", "muxError", "videoCodec", "videoWidth", "videoHeight", "audioCodec", "lastMuxFailureStage", "lastMuxFailureError", "lastMuxFailureVideoCodec", "lastMuxFailureAudioCodec", "videoContainer", "audioContainer", "portableStage", "portableError"})
             edit.putInt(name, Math.max(0, data.getInt(name)));
         edit.putLong("updated", System.currentTimeMillis());
         edit.apply();
@@ -58,7 +58,7 @@ public final class SettingsProvider extends ContentProvider {
         for (String name : COUNTERS)
             out.putInt(name, prefs.getInt(name, 0));
         out.putBoolean("supported", prefs.getBoolean("supported", false));
-        for (String name : new String[]{"downloadHooks", "downloads", "downloadFailures", "downloadStage", "downloadError", "downloadSidebarRows", "muxStage", "muxError", "videoCodec", "videoWidth", "videoHeight", "audioCodec", "lastMuxFailureStage", "lastMuxFailureError", "lastMuxFailureVideoCodec", "lastMuxFailureAudioCodec", "videoContainer", "audioContainer", "portableStage", "portableError"})
+        for (String name : new String[]{"threadsVideo", "downloadHooks", "downloads", "downloadFailures", "downloadStage", "downloadError", "downloadSidebarRows", "muxStage", "muxError", "videoCodec", "videoWidth", "videoHeight", "audioCodec", "lastMuxFailureStage", "lastMuxFailureError", "lastMuxFailureVideoCodec", "lastMuxFailureAudioCodec", "videoContainer", "audioContainer", "portableStage", "portableError"})
             out.putInt(name, prefs.getInt(name, 0));
         out.putLong("updated", prefs.getLong("updated", 0));
         return out;

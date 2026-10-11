@@ -45,6 +45,7 @@ final class HostState {
     final AtomicInteger videoCards = new AtomicInteger();
     final AtomicInteger contentHooks = new AtomicInteger();
     final AtomicInteger threads = new AtomicInteger();
+    final AtomicInteger threadsVideo = new AtomicInteger();
     final AtomicInteger storiesTop = new AtomicInteger();
     final AtomicInteger storiesMiddle = new AtomicInteger();
     final AtomicInteger reels = new AtomicInteger();
@@ -85,6 +86,7 @@ final class HostState {
         out.putInt("reelsLaunchFlags", reelsLaunchFlags.get()); out.putInt("affiliateCards", affiliateCards.get());
         out.putInt("videoMetadata", videoMetadata.get()); out.putInt("videoCards", videoCards.get());
         out.putInt("contentHooks", contentHooks.get()); out.putInt("threads", threads.get());
+        out.putInt("threadsVideo", threadsVideo.get());
         out.putInt("storiesTop", storiesTop.get()); out.putInt("storiesMiddle", storiesMiddle.get()); out.putInt("reels", reels.get());
         out.putInt("hooks", hooks.get()); out.putInt("ads", ads.get()); out.putInt("suggestions", suggestions.get()); out.putInt("reads", reads.get());
         out.putInt("cacheCalls", cacheCalls.get()); out.putInt("renderCalls", renderCalls.get());

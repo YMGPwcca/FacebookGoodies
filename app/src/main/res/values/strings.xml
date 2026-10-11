@@ -41,7 +41,7 @@
     <string name="diagnostic_downloads">Videos saved</string>
     <string name="diagnostic_download_failures">Downloads cancelled or failed</string>
     <string name="hide_threads">Hide Threads</string>
-    <string name="hide_threads_description">Remove Threads recommendations from the feed.</string>
+    <string name="hide_threads_description">Remove Threads recommendations from the feed and between videos.</string>
     <string name="hide_stories_top">Hide Stories at the top</string>
     <string name="hide_stories_top_description">Remove the top tray. Restart Facebook after changing.</string>
     <string name="hide_stories_middle">Hide Stories in the middle</string>
