@@ -1,0 +1,6 @@
+// CI-only workaround for PrivateApiDetector's PSI crash on obfuscated Facebook class names.
+allprojects {
+    plugins.withId('com.android.application') {
+        android.lint.disable.addAll(['BlockedPrivateApi', 'DiscouragedPrivateApi', 'PrivateApi', 'SoonBlockedPrivateApi'])
+    }
+}

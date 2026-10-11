@@ -6,3 +6,4 @@ local.properties
 *.log
 Thumbs.db
 device-verification*.json
+**/__pycache__/
