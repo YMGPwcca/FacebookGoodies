@@ -8,14 +8,18 @@ An LSPosed module for a cleaner Facebook feed.
 - Suppress supported video ad breaks and Reels banners.
 - Hide affiliate product cards over Reels.
 - Hide suggested posts and People You May Know.
-- Hide Threads recommendations and Reels cards in News Feed.
+- Hide Threads recommendations in News Feed and between Reels/videos.
+- Hide Reels cards in News Feed.
 - Hide Stories at the top or between posts, with separate switches.
 - Hide read receipts in Facebook chats.
 - Block supported screenshot-detection signals.
+- Download the current video at the highest available resolution, with audio.
 
 Friends’ shares stay visible. Read-receipt filtering applies to chats inside Facebook and may leave chats unread.
 
 The content filters are off by default. Restart Facebook after changing the top Stories setting; refresh the feed for the other filters.
+
+While a video is playing, tap Download above More in the player's action sidebar. Videos save to `Downloads/FacebookGoodies`. Only the current video is selected; there is no video history. The progress dialog shows source finding, video and audio transfers, merging and saving, with elapsed time and transfer speed. Downloads can be cancelled from the dialog.
 
 ## Requirements
 
