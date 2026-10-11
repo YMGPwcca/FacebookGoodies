@@ -1,6 +1,5 @@
 """Plan version-bump releases and publish verified APKs without replacing published assets."""
 import argparse
-import datetime
 import hashlib
 import json
 import os
@@ -70,11 +69,6 @@ def version_key(version):
     return tuple(int(part) for part in version.split("."))
 
 
-def commit_time(value):
-    zone = datetime.timezone(datetime.timedelta(hours=7))
-    return datetime.datetime.fromisoformat(value).astimezone(zone).strftime("%Y-%m-%d %H:%M:%S UTC+07:00 (Asia/Saigon)")
-
-
 def previous_tag(version):
     tags = [tag for tag in git("tag", "--list", "v*").splitlines() if VERSION.fullmatch(tag[1:])]
     older = [tag for tag in tags if version_key(tag[1:]) < version_key(version)]
@@ -92,9 +86,7 @@ def change_lines(sha, previous):
 
 def notes(record, digest, repository):
     previous = previous_tag(record["version"])
-    commit_url = f"https://github.com/{repository}/commit/{record['sha']}"
-    return (f"**Version-bump commit time:** {commit_time(record['time'])} · [{record['sha'][:7]}]({commit_url})\n\n"
-            "## Changes\n\n" + change_lines(record["sha"], previous) + "\n\n"
+    return ("## Changes\n\n" + change_lines(record["sha"], previous) + "\n\n"
             "## Requirements and installation\n\n"
             "Android 9+, LSPosed, and Facebook **582.0.0.50.54 / 475417129**. Install the APK, "
             "enable FacebookGoodies for Facebook in LSPosed, then restart Facebook.\n\n"

@@ -23,9 +23,6 @@ class VersionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             release.version_key("1.3.2; command")
 
-    def test_commit_time_uses_vietnam_timezone(self):
-        self.assertEqual("2026-10-11 20:54:19 UTC+07:00 (Asia/Saigon)", release.commit_time("2026-10-11T13:54:19+00:00"))
-
     def test_published_release_is_never_overwritten(self):
         with patch.object(release, "ensure_tag", return_value="v1.3.1"), patch.object(release, "api", return_value=[
                 {"tag_name": "v1.3.1", "draft": False, "html_url": "https://example.test/release"}]), patch.object(release, "command") as command:
@@ -127,14 +124,15 @@ class PlanningTests(unittest.TestCase):
         with self.assertRaises(subprocess.CalledProcessError):
             release.plan("workflow_dispatch", {"inputs": {"ref": self.git("rev-parse", "HEAD")}})
 
-    def test_empty_version_bump_notes_and_exact_time(self):
+    def test_maintenance_notes_omit_commit_details(self):
         self.git("tag", "v1.0.0", self.initial)
         sha = self.commit("1.0.1", 2, "chore(release): bump version to 1.0.1")
         body = release.notes(release.release_record(sha, True), "0" * 64, "owner/repo")
         self.assertIn("Maintenance version and build metadata update", body)
-        self.assertIn("Version-bump commit time:", body)
-        self.assertIn("Asia/Saigon", body)
-        self.assertIn(sha, body)
+        self.assertNotIn("commit time", body)
+        self.assertNotIn("Asia/Saigon", body)
+        self.assertNotIn(sha, body)
+        self.assertNotIn("/commit/", body)
 
 
 if __name__ == "__main__":
