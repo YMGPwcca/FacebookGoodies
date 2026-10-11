@@ -6,6 +6,7 @@ An LSPosed module for a cleaner Facebook feed.
 
 - Hide sponsored posts and videos in News Feed, Reels and Video feeds.
 - Suppress supported video ad breaks and Reels banners.
+- Hide affiliate product cards over Reels.
 - Hide suggested posts and People You May Know.
 - Hide Threads recommendations and Reels cards in News Feed.
 - Hide Stories at the top or between posts, with separate switches.
