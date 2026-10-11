@@ -28,4 +28,19 @@ public final class VideoAdPolicyTest {
                 "fb_shorts_replace_audio_for_boost", "VIDEO_HOME"})
             assertEquals(VideoAdPolicy.Surface.NONE, VideoAdPolicy.surface(true, origin));
     }
+
+    @Test public void reelsSuboriginsCoverFollowingAndSearchWithoutBlockingOrdinarySearch() {
+        for (String primary : new String[]{"video_home", "following_np_subtab", "results"})
+            assertEquals(VideoAdPolicy.Surface.REELS, VideoAdPolicy.surface(true, primary, "fb_shorts_viewer"));
+        assertEquals(VideoAdPolicy.Surface.REELS, VideoAdPolicy.surface(true, "newsfeed", "fb_shorts_native_in_feed_unit"));
+        assertEquals(VideoAdPolicy.Surface.REELS, VideoAdPolicy.surface(true, "video_home", "fb_shorts_native_watch_in_feed_unit"));
+        assertEquals(VideoAdPolicy.Surface.NONE, VideoAdPolicy.surface(true, "following_np_subtab", null));
+        assertEquals(VideoAdPolicy.Surface.NONE, VideoAdPolicy.surface(true, "results", "search"));
+    }
+
+    @Test public void unrecognizedPrimaryCannotBecomeReelsThroughASuborigin() {
+        for (String primary : new String[]{null, "stories", "marketplace", "unknown"})
+            assertEquals(VideoAdPolicy.Surface.NONE, VideoAdPolicy.surface(true, primary, "fb_shorts_viewer"));
+        assertEquals(VideoAdPolicy.Surface.NONE, VideoAdPolicy.surface(false, "results", "fb_shorts_viewer"));
+    }
 }

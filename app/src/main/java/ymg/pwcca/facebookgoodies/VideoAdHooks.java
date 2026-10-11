@@ -1,7 +1,6 @@
 package ymg.pwcca.facebookgoodies;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
@@ -22,8 +21,10 @@ final class VideoAdHooks {
         }
         for (String owner : new String[]{"X.T85", "X.T86"})
             attempt("reels-completion", state, () -> reelsCompletion(loader, owner, state));
-        attempt("video-completion", state, () -> videoCompletion(loader, state));
+        VideoAdResponses.install(loader, state);
+        VideoAdMetadataHooks.install(loader, state);
         attempt("reels-banner", state, () -> reelsBanner(loader, state));
+        ReelsOverlayHooks.install(loader, state);
         XposedBridge.log("FacebookGoodies: video hooks=" + state.videoHooks.get());
     }
 
@@ -55,35 +56,6 @@ final class VideoAdHooks {
                     state.videoAdFiltered(VideoAdPolicy.Surface.REELS);
                 } catch (ReflectiveOperationException | RuntimeException failed) {
                     state.failure("reels-completion");
-                }
-            }
-        });
-    }
-
-    private static void videoCompletion(ClassLoader loader, HostState state) throws ReflectiveOperationException {
-        Class<?> callback = Class.forName("X.Sx0", false, loader);
-        Class<?> origin = Class.forName("com.facebook.video.common.playerorigin.PlayerOrigin", false, loader);
-        Field playerOrigin = callback.getDeclaredField("A09");
-        Field originName = origin.getDeclaredField("A00");
-        if (playerOrigin.getType() != origin || originName.getType() != String.class)
-            throw new NoSuchFieldException("Video origin contract mismatch");
-        playerOrigin.setAccessible(true);
-        originName.setAccessible(true);
-        Method success = method(loader, "X.Sx0", "onSuccess", "void", new String[]{"java.lang.Object"});
-        // The original callback explicitly accepts null and runs its empty-result completion path.
-        // Never cancel its future or bypass its callback; host-video restoration must still run.
-        register(success, state, new XC_MethodHook() {
-            @Override protected void beforeHookedMethod(MethodHookParam param) {
-                if (!state.options.ads || param.args[0] == null) return;
-                try {
-                    Object source = playerOrigin.get(param.thisObject);
-                    String name = source == null ? null : (String) originName.get(source);
-                    VideoAdPolicy.Surface surface = VideoAdPolicy.surface(true, name);
-                    if (surface == VideoAdPolicy.Surface.NONE) return;
-                    param.args[0] = null;
-                    state.videoAdFiltered(surface);
-                } catch (ReflectiveOperationException | RuntimeException failed) {
-                    state.failure("video-completion");
                 }
             }
         });

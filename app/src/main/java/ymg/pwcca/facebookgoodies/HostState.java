@@ -16,6 +16,13 @@ final class HostState {
     final AtomicInteger videoHooks = new AtomicInteger();
     final AtomicInteger reelsAds = new AtomicInteger();
     final AtomicInteger videoAds = new AtomicInteger();
+    final AtomicInteger videoResponses = new AtomicInteger();
+    final AtomicInteger videoUnmatched = new AtomicInteger();
+    final AtomicInteger videoSourceCode = new AtomicInteger();
+    final AtomicInteger reelsLaunchFlags = new AtomicInteger();
+    final AtomicInteger affiliateCards = new AtomicInteger();
+    final AtomicInteger videoMetadata = new AtomicInteger();
+    final AtomicInteger videoCards = new AtomicInteger();
     final AtomicInteger contentHooks = new AtomicInteger();
     final AtomicInteger threads = new AtomicInteger();
     final AtomicInteger storiesTop = new AtomicInteger();
@@ -43,6 +50,10 @@ final class HostState {
     private Bundle snapshot() {
         Bundle out = new Bundle(); out.putBoolean("supported", supported);
         out.putInt("videoHooks", videoHooks.get()); out.putInt("reelsAds", reelsAds.get()); out.putInt("videoAds", videoAds.get());
+        out.putInt("videoResponses", videoResponses.get()); out.putInt("videoUnmatched", videoUnmatched.get());
+        out.putInt("videoSourceCode", videoSourceCode.get());
+        out.putInt("reelsLaunchFlags", reelsLaunchFlags.get()); out.putInt("affiliateCards", affiliateCards.get());
+        out.putInt("videoMetadata", videoMetadata.get()); out.putInt("videoCards", videoCards.get());
         out.putInt("contentHooks", contentHooks.get()); out.putInt("threads", threads.get());
         out.putInt("storiesTop", storiesTop.get()); out.putInt("storiesMiddle", storiesMiddle.get()); out.putInt("reels", reels.get());
         out.putInt("hooks", hooks.get()); out.putInt("ads", ads.get()); out.putInt("suggestions", suggestions.get()); out.putInt("reads", reads.get());

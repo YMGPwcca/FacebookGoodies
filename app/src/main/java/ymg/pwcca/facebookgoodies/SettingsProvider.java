@@ -13,7 +13,7 @@ import java.util.Arrays;
 public final class SettingsProvider extends ContentProvider {
     static final Uri URI = Uri.parse("content://ymg.pwcca.facebookgoodies.settings");
     static final String PREFS = "controls";
-    private static final String[] COUNTERS = {"hooks", "ads", "suggestions", "reads", "captures", "errors", "starts", "pid", "cacheCalls", "renderCalls", "cacheRemoved", "renderRemoved", "videoHooks", "reelsAds", "videoAds", "contentHooks", "threads", "storiesTop", "storiesMiddle", "reels"};
+    private static final String[] COUNTERS = {"hooks", "ads", "suggestions", "reads", "captures", "errors", "starts", "pid", "cacheCalls", "renderCalls", "cacheRemoved", "renderRemoved", "videoHooks", "reelsAds", "videoAds", "videoResponses", "videoUnmatched", "videoSourceCode", "reelsLaunchFlags", "affiliateCards", "videoMetadata", "videoCards", "contentHooks", "threads", "storiesTop", "storiesMiddle", "reels"};
     @Override public boolean onCreate() { return true; }
     private boolean isFacebook(int uid) {
         String[] names = getContext().getPackageManager().getPackagesForUid(uid);
