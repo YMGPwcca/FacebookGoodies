@@ -94,6 +94,8 @@ public final class SettingsActivity extends Activity {
         addSetting(privacy, "receipts", R.string.suppress_read_receipts, R.string.suppress_read_receipts_description);
         addDivider(privacy);
         addSetting(privacy, "capture", R.string.block_capture_detection, R.string.block_capture_detection_description);
+        LinearLayout downloads = addGroup(R.string.section_downloads);
+        addSetting(downloads, "downloads", R.string.download_current_video, R.string.download_current_video_description);
         addDiagnostics();
         if (saved != null && saved.getBoolean("diagnostics_open")) setDiagnosticsOpen(true);
     }
@@ -231,6 +233,9 @@ public final class SettingsActivity extends Activity {
         addCounter("reads", R.string.diagnostic_reads);
         addCounter("captures", R.string.diagnostic_captures);
         addCounter("errors", R.string.diagnostic_errors);
+        addCounter("downloadHooks", R.string.diagnostic_download_hooks);
+        addCounter("downloads", R.string.diagnostic_downloads);
+        addCounter("downloadFailures", R.string.diagnostic_download_failures);
         Button refresh = textButton(R.string.refresh);
         refresh.setOnClickListener(view -> refreshStatus());
         diagnostics.addView(refresh, size(-1, 48));

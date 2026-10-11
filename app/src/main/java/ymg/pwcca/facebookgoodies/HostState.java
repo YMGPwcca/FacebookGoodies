@@ -12,6 +12,26 @@ final class HostState {
     volatile Options options = Options.OFF;
     volatile boolean supported;
     final AtomicInteger hooks = new AtomicInteger();
+    final AtomicInteger downloadHooks = new AtomicInteger();
+    final AtomicInteger downloads = new AtomicInteger();
+    final AtomicInteger downloadFailures = new AtomicInteger();
+    final AtomicInteger downloadStage = new AtomicInteger();
+    final AtomicInteger downloadError = new AtomicInteger();
+    final AtomicInteger downloadSidebarRows = new AtomicInteger();
+    final AtomicInteger muxStage = new AtomicInteger();
+    final AtomicInteger muxError = new AtomicInteger();
+    final AtomicInteger videoCodec = new AtomicInteger();
+    final AtomicInteger videoWidth = new AtomicInteger();
+    final AtomicInteger videoHeight = new AtomicInteger();
+    final AtomicInteger audioCodec = new AtomicInteger();
+    final AtomicInteger lastMuxFailureStage = new AtomicInteger();
+    final AtomicInteger lastMuxFailureError = new AtomicInteger();
+    final AtomicInteger lastMuxFailureVideoCodec = new AtomicInteger();
+    final AtomicInteger lastMuxFailureAudioCodec = new AtomicInteger();
+    final AtomicInteger videoContainer = new AtomicInteger();
+    final AtomicInteger audioContainer = new AtomicInteger();
+    final AtomicInteger portableStage = new AtomicInteger();
+    final AtomicInteger portableError = new AtomicInteger();
     final AtomicInteger ads = new AtomicInteger();
     final AtomicInteger videoHooks = new AtomicInteger();
     final AtomicInteger reelsAds = new AtomicInteger();
@@ -49,6 +69,16 @@ final class HostState {
     }
     private Bundle snapshot() {
         Bundle out = new Bundle(); out.putBoolean("supported", supported);
+        out.putInt("downloadHooks", downloadHooks.get()); out.putInt("downloads", downloads.get()); out.putInt("downloadFailures", downloadFailures.get());
+        out.putInt("downloadStage", downloadStage.get()); out.putInt("downloadError", downloadError.get());
+        out.putInt("downloadSidebarRows", downloadSidebarRows.get());
+        out.putInt("muxStage", muxStage.get()); out.putInt("muxError", muxError.get());
+        out.putInt("videoCodec", videoCodec.get()); out.putInt("videoWidth", videoWidth.get());
+        out.putInt("videoHeight", videoHeight.get()); out.putInt("audioCodec", audioCodec.get());
+        out.putInt("lastMuxFailureStage", lastMuxFailureStage.get()); out.putInt("lastMuxFailureError", lastMuxFailureError.get());
+        out.putInt("lastMuxFailureVideoCodec", lastMuxFailureVideoCodec.get()); out.putInt("lastMuxFailureAudioCodec", lastMuxFailureAudioCodec.get());
+        out.putInt("videoContainer", videoContainer.get()); out.putInt("audioContainer", audioContainer.get());
+        out.putInt("portableStage", portableStage.get()); out.putInt("portableError", portableError.get());
         out.putInt("videoHooks", videoHooks.get()); out.putInt("reelsAds", reelsAds.get()); out.putInt("videoAds", videoAds.get());
         out.putInt("videoResponses", videoResponses.get()); out.putInt("videoUnmatched", videoUnmatched.get());
         out.putInt("videoSourceCode", videoSourceCode.get());

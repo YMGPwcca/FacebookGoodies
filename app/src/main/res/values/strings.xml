@@ -34,6 +34,12 @@
     <string name="section_feed">Feed</string>
     <string name="section_privacy">Privacy</string>
     <string name="section_content">Feed content</string>
+    <string name="section_downloads">Downloads</string>
+    <string name="download_current_video">Download current video</string>
+    <string name="download_current_video_description">Add Download above More in the player sidebar.</string>
+    <string name="diagnostic_download_hooks">Download hooks loaded</string>
+    <string name="diagnostic_downloads">Videos saved</string>
+    <string name="diagnostic_download_failures">Downloads cancelled or failed</string>
     <string name="hide_threads">Hide Threads</string>
     <string name="hide_threads_description">Remove Threads recommendations from the feed.</string>
     <string name="hide_stories_top">Hide Stories at the top</string>

@@ -35,6 +35,7 @@ public final class SettingsProvider extends ContentProvider {
         out.putBoolean("suggestions", prefs.getBoolean("suggestions", true));
         out.putBoolean("receipts", prefs.getBoolean("receipts", true));
         out.putBoolean("capture", prefs.getBoolean("capture", true));
+        out.putBoolean("downloads", prefs.getBoolean("downloads", true));
         for (String key : new String[]{"hide_threads", "hide_stories_top", "hide_stories_middle", "hide_reels"})
             out.putBoolean(key, prefs.getBoolean(key, false));
         return out;
@@ -45,6 +46,8 @@ public final class SettingsProvider extends ContentProvider {
         for (String name : COUNTERS)
             edit.putInt(name, Math.max(0, data.getInt(name)));
         edit.putBoolean("supported", data.getBoolean("supported"));
+        for (String name : new String[]{"downloadHooks", "downloads", "downloadFailures", "downloadStage", "downloadError", "downloadSidebarRows", "muxStage", "muxError", "videoCodec", "videoWidth", "videoHeight", "audioCodec", "lastMuxFailureStage", "lastMuxFailureError", "lastMuxFailureVideoCodec", "lastMuxFailureAudioCodec", "videoContainer", "audioContainer", "portableStage", "portableError"})
+            edit.putInt(name, Math.max(0, data.getInt(name)));
         edit.putLong("updated", System.currentTimeMillis());
         edit.apply();
         return new Bundle();
@@ -55,6 +58,8 @@ public final class SettingsProvider extends ContentProvider {
         for (String name : COUNTERS)
             out.putInt(name, prefs.getInt(name, 0));
         out.putBoolean("supported", prefs.getBoolean("supported", false));
+        for (String name : new String[]{"downloadHooks", "downloads", "downloadFailures", "downloadStage", "downloadError", "downloadSidebarRows", "muxStage", "muxError", "videoCodec", "videoWidth", "videoHeight", "audioCodec", "lastMuxFailureStage", "lastMuxFailureError", "lastMuxFailureVideoCodec", "lastMuxFailureAudioCodec", "videoContainer", "audioContainer", "portableStage", "portableError"})
+            out.putInt(name, prefs.getInt(name, 0));
         out.putLong("updated", prefs.getLong("updated", 0));
         return out;
     }
