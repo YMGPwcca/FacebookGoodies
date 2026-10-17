@@ -23,20 +23,31 @@ public final class FacebookModule implements IXposedHookLoadPackage {
         });
     }
     private static void initialize(Context app) {
-        HostState state = new HostState(); state.supported = supports(app); state.start(app);
+        FacebookBuild build = hostBuild(app);
+        HostState state = new HostState(); state.supported = build != FacebookBuild.UNSUPPORTED; state.start(app);
         if (!state.supported) { XposedBridge.log("FacebookGoodies: unsupported host build; hooks disabled"); return; }
         ClassLoader loader = app.getClassLoader();
-        try { AdHooks.install(loader, state); } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) { state.failure("feed-install"); }
-        VideoAdHooks.install(loader, state);
-        FeedContentHooks.install(loader, state);
-        VideoDownloadHooks.install((Application) app, loader, state);
+        if (build == FacebookBuild.FACEBOOK_582) install582((Application) app, loader, state);
+        else install583((Application) app, loader, state);
         try { PrivacyHooks.install(loader, state); } catch (RuntimeException | LinkageError failure) { state.failure("privacy-install"); }
         XposedBridge.log("FacebookGoodies: initialized hooks=" + state.hooks.get());
     }
-    private static boolean supports(Context app) {
+    private static void install582(Application app, ClassLoader loader, HostState state) {
+        try { AdHooks.install(loader, state); } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) { state.failure("feed-install"); }
+        VideoAdHooks.install(loader, state);
+        FeedContentHooks.install(loader, state);
+        VideoDownloadHooks.install(app, loader, state);
+    }
+    private static void install583(Application app, ClassLoader loader, HostState state) {
+        try { AdHooks583.install(loader, state); } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) { state.failure("feed-install"); }
+        VideoAdHooks583.install(loader, state);
+        FeedContentHooks583.install(loader, state);
+        VideoDownloadHooks583.install(app, loader, state);
+    }
+    private static FacebookBuild hostBuild(Context app) {
         try {
             PackageInfo info = app.getPackageManager().getPackageInfo("com.facebook.katana", 0);
-            return "582.0.0.50.54".equals(info.versionName) && info.getLongVersionCode() == 475417129L;
-        } catch (android.content.pm.PackageManager.NameNotFoundException failure) { return false; }
+            return FacebookBuild.identify(info.versionName, info.getLongVersionCode());
+        } catch (android.content.pm.PackageManager.NameNotFoundException failure) { return FacebookBuild.UNSUPPORTED; }
     }
 }

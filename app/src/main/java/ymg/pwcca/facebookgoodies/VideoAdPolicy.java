@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-/** Explicit player origins from Facebook 582. Unknown and non-video surfaces stay untouched. */
+/** Explicit player origins from supported Facebook 582 and 583 builds. Unknown and non-video surfaces stay untouched. */
 final class VideoAdPolicy {
     enum Surface { NONE, REELS, VIDEO }
     private static final Set<String> REELS = new HashSet<>(Arrays.asList(
