@@ -1,6 +1,15 @@
-# Supported Facebook build
+# Supported Facebook builds
 
-Current hooks target Facebook for Android `com.facebook.katana`, version **582.0.0.50.54**, version code **475417129**. The module checks the installed package and version and leaves the Facebook hooks disabled when the host does not match. Its LSPosed scope targets Facebook only.
+Current hooks target these Facebook for Android `com.facebook.katana` builds:
+
+| Facebook version | Version code | Minimum Android |
+| --- | ---: | --- |
+| **582.0.0.50.54** | **475417129** | Android 11 |
+| **583.0.0.39.55** | **475614366** | Android 11 |
+
+The module checks both the installed version name and version code, then selects that build's hook bindings. Other builds leave the Facebook hooks disabled. Its LSPosed scope targets Facebook only.
+
+The 583 bindings were checked against the matching APK's DEX. Feature behavior on 583 still needs an on-device check.
 
 ## Implemented features
 
@@ -14,7 +23,7 @@ Current hooks target Facebook for Android `com.facebook.katana`, version **582.0
 - Hides Facebook suggestion and people-you-may-know categories. Ordinary posts and friends' shares are preserved.
 - Adds independent switches for Threads recommendations in News Feed and between Reels/videos, the top Stories tray, Stories between posts, and Reels cards in News Feed.
 - Adds switches to suppress the in-app Messenger mark-thread-read call and supported screenshot-detection callbacks.
-- Adds Download immediately above More in the native Reels/video action sidebar, for the current visible video in the verified `X.58I` player. It snapshots that video's sources on tap, selects the largest pixel resolution from its DASH manifest (bandwidth breaks ties), downloads the highest-bandwidth audio track, and muxes encoded samples into MP4 without re-encoding. When no adaptive manifest exists, it uses the player's HD URL, then SD URL.
+- Adds Download immediately above More in the native Reels/video action sidebar, for the current visible video in the `X.58I` player on 582 or `X.5B3` on 583. It snapshots that video's sources on tap, selects the largest pixel resolution from its DASH manifest (bandwidth breaks ties), downloads the highest-bandwidth audio track, and muxes encoded samples into MP4 without re-encoding. When no adaptive manifest exists, it uses the player's HD URL, then SD URL.
 
 Unknown categories and unsupported model shapes remain visible. Counts in the settings screen are interception actions, not unique posts.
 
@@ -26,6 +35,6 @@ Download metadata is held only for the active visible player and cleared on play
 
 The progress dialog keeps source-finding, transfer, merge, save and cleanup stages visible. Separate video and audio files download in parallel. Transfer rows show elapsed time, size and speed; percentages appear only when the full transfer size is known. Signed source URLs are never displayed.
 
-Downloads support static single-period MP4 DASH with complete `SegmentBase` URLs, `SegmentList`, and finite `SegmentTimeline` templates using unformatted Number/Time placeholders. VP9 video in MP4 uses a lossless container merge when Android's native MP4 writer rejects that codec; the video resolution and encoded audio/video samples are preserved. Its parser mapping is bundled with the module for LSPosed class loading. Live, protected, WebM/HLS, multi-period and other unsupported manifest forms fail with a message; a supported lower resolution is not silently substituted for an unsupported highest source. Signed media URLs can expire: play the video again and retry. Downloads run in Facebook's process and can be interrupted if Android kills it. Android 10+ uses pending MediaStore entries; Android 9 needs Facebook's existing storage permission. Native device checks and actual Facebook feed/Reels download acceptance are tracked separately in the local analysis report.
+Downloads support static single-period MP4 DASH with complete `SegmentBase` URLs, `SegmentList`, and finite `SegmentTimeline` templates using unformatted Number/Time placeholders. VP9 video in MP4 uses a lossless container merge when Android's native MP4 writer rejects that codec; the video resolution and encoded audio/video samples are preserved. Its parser mapping is bundled with the module for LSPosed class loading. Live, protected, WebM/HLS, multi-period and other unsupported manifest forms fail with a message; a supported lower resolution is not silently substituted for an unsupported highest source. Signed media URLs can expire: play the video again and retry. Downloads run in Facebook's process and can be interrupted if Android kills it. Android 11+ uses pending MediaStore entries. Native device checks and actual Facebook feed/Reels download acceptance are tracked separately in the local analysis report.
 
 Ads inside the Stories viewer, Marketplace and games, other suggested-content categories, the separate Messenger app, repost actions, account import/export, remote configuration, donations, and updates are outside this project.

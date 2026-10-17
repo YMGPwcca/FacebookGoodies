@@ -23,7 +23,7 @@ While a video is playing, tap Download above More in the player's action sidebar
 
 ## Requirements
 
-Android 9 or newer, LSPosed, and Facebook **582.0.0.50.54**. See [compatibility details](SUPPORT.md) for the matching build.
+Android 11 or newer, LSPosed, and Facebook **582.0.0.50.54** or **583.0.0.39.55** with a [matching build code](SUPPORT.md).
 
 ## Setup
 
