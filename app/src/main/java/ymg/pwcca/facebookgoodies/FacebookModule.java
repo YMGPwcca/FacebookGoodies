@@ -1,6 +1,7 @@
 package ymg.pwcca.facebookgoodies;
 
 import android.app.Application;
+import android.app.Instrumentation;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -14,22 +15,35 @@ public final class FacebookModule implements IXposedHookLoadPackage {
     private static final AtomicBoolean started = new AtomicBoolean();
     @Override public void handleLoadPackage(XC_LoadPackage.LoadPackageParam packageInfo) {
         if (!"com.facebook.katana".equals(packageInfo.packageName) || !"com.facebook.katana".equals(packageInfo.processName)) return;
-        XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
-            @Override protected void afterHookedMethod(MethodHookParam param) {
+        // Application.attach runs before LoadedApk publishes the Application instance.
+        // Facebook starts AppInit workers in that window; wait until the framework calls onCreate.
+        XposedHelpers.findAndHookMethod(Instrumentation.class, "callApplicationOnCreate", Application.class, new XC_MethodHook() {
+            @Override protected void beforeHookedMethod(MethodHookParam param) {
+                Application app = (Application) param.args[0];
+                if (!"com.facebook.katana".equals(app.getPackageName())) return;
+                if (app.getApplicationContext() == null) {
+                    XposedBridge.log("FacebookGoodies: application context unavailable; hooks disabled");
+                    return;
+                }
                 if (!started.compareAndSet(false, true)) return;
-                Context app = (Application) param.thisObject;
-                initialize(app);
+                try { initialize(app); }
+                catch (RuntimeException | LinkageError failure) { XposedBridge.log("FacebookGoodies: startup incomplete"); }
             }
         });
     }
-    private static void initialize(Context app) {
+    private static void initialize(Application app) {
         FacebookBuild build = hostBuild(app);
-        HostState state = new HostState(); state.supported = build != FacebookBuild.UNSUPPORTED; state.start(app);
-        if (!state.supported) { XposedBridge.log("FacebookGoodies: unsupported host build; hooks disabled"); return; }
+        HostState state = new HostState(); state.supported = build != FacebookBuild.UNSUPPORTED;
+        if (!state.supported) {
+            state.start(app);
+            XposedBridge.log("FacebookGoodies: unsupported host build; hooks disabled");
+            return;
+        }
         ClassLoader loader = app.getClassLoader();
-        if (build == FacebookBuild.FACEBOOK_582) install582((Application) app, loader, state);
-        else install583((Application) app, loader, state);
+        if (build == FacebookBuild.FACEBOOK_582) install582(app, loader, state);
+        else install583(app, loader, state);
         try { PrivacyHooks.install(loader, state); } catch (RuntimeException | LinkageError failure) { state.failure("privacy-install"); }
+        state.start(app);
         XposedBridge.log("FacebookGoodies: initialized hooks=" + state.hooks.get());
     }
     private static void install582(Application app, ClassLoader loader, HostState state) {
