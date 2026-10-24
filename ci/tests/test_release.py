@@ -124,11 +124,11 @@ class PlanningTests(unittest.TestCase):
         with self.assertRaises(subprocess.CalledProcessError):
             release.plan("workflow_dispatch", {"inputs": {"ref": self.git("rev-parse", "HEAD")}})
 
-    def test_maintenance_notes_omit_commit_details(self):
+    def test_release_notes_include_supported_host_and_omit_commit_details(self):
         self.git("tag", "v1.0.0", self.initial)
         sha = self.commit("1.0.1", 2, "chore(release): bump version to 1.0.1")
         body = release.notes(release.release_record(sha, True), "0" * 64, "owner/repo")
-        self.assertIn("Maintenance version and build metadata update", body)
+        self.assertIn("584.0.0.51.56 / 475817510", body)
         self.assertNotIn("commit time", body)
         self.assertNotIn("Asia/Saigon", body)
         self.assertNotIn(sha, body)

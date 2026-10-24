@@ -6,10 +6,11 @@ Current hooks target these Facebook for Android `com.facebook.katana` builds:
 | --- | ---: | --- |
 | **582.0.0.50.54** | **475417129** | Android 11 |
 | **583.0.0.39.55** | **475614366** | Android 11 |
+| **584.0.0.51.56** | **475817510** | Android 11 |
 
 The module checks both the installed version name and version code, then selects that build's hook bindings. Other builds leave the Facebook hooks disabled. Its LSPosed scope targets Facebook only.
 
-The 583 bindings were checked against the matching APK's DEX. Feature behavior on 583 still needs an on-device check.
+The 583 and 584 hook bindings were checked against their matching APKs' DEX. On Facebook 584, News Feed loaded with the module active, and the user confirmed that ads are absent and video downloads work. Threads cards appeared intermittently in Reels on a previous build; they have not been seen yet on 584, so that behavior is not confirmed fixed. Other Reels-specific behavior on 584 and feature behavior on 583 still need on-device verification.
 
 ## Implemented features
 
@@ -23,7 +24,7 @@ The 583 bindings were checked against the matching APK's DEX. Feature behavior o
 - Hides Facebook suggestion and people-you-may-know categories. Ordinary posts and friends' shares are preserved.
 - Adds independent switches for Threads recommendations in News Feed and between Reels/videos, the top Stories tray, Stories between posts, and Reels cards in News Feed.
 - Adds switches to suppress the in-app Messenger mark-thread-read call and supported screenshot-detection callbacks.
-- Adds Download immediately above More in the native Reels/video action sidebar, for the current visible video in the `X.58I` player on 582 or `X.5B3` on 583. It snapshots that video's sources on tap, selects the largest pixel resolution from its DASH manifest (bandwidth breaks ties), downloads the highest-bandwidth audio track, and muxes encoded samples into MP4 without re-encoding. When no adaptive manifest exists, it uses the player's HD URL, then SD URL.
+- Adds Download immediately above More in the native Reels/video action sidebar, for the current visible video in the `X.58I` player on 582, `X.5B3` on 583, or `X.55R` on 584. It snapshots that video's sources on tap, selects the largest pixel resolution from its DASH manifest (bandwidth breaks ties), downloads the highest-bandwidth audio track, and muxes encoded samples into MP4 without re-encoding. When no adaptive manifest exists, it uses the player's HD URL, then SD URL.
 
 Unknown categories and unsupported model shapes remain visible. Counts in the settings screen are interception actions, not unique posts.
 

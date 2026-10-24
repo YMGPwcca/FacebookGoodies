@@ -1,6 +1,6 @@
 package ymg.pwcca.facebookgoodies;
 
-/** Exact GraphQLMedia instream-break fields in supported Facebook 582 and 583 builds. */
+/** Exact GraphQLMedia instream-break fields in supported Facebook builds. */
 final class VideoAdMetadataPolicy {
     private static final int AD_BREAK_TYPE = 162951166;
 
