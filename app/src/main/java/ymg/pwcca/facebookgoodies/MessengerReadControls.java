@@ -357,7 +357,7 @@ final class MessengerReadControls {
             String sdkId = activeSdkId;
             request = sdkId == null || ambiguousChat ? null : pending.get(sdkId);
             if (request == null) {
-                toast("Chưa có trạng thái đã xem để gửi");
+                toast("No pending read receipt to send");
                 return;
             }
             if (!request.sending.compareAndSet(false, true)) return;
@@ -375,7 +375,7 @@ final class MessengerReadControls {
             }
             updateButtonVisibility();
             logFailure("manual seen", failure);
-            toast("Không gửi được trạng thái đã xem");
+            toast("Couldn't send read receipt");
         }
     }
 
@@ -389,7 +389,7 @@ final class MessengerReadControls {
                 }
                 main.post(() -> {
                     updateButtonVisibility();
-                    toast(success ? "Đã gửi trạng thái đã xem" : "Không gửi được trạng thái đã xem");
+                    toast(success ? "Read receipt sent" : "Couldn't send read receipt");
                 });
                 return null;
             }
