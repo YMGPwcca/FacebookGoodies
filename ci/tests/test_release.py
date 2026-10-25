@@ -129,6 +129,7 @@ class PlanningTests(unittest.TestCase):
         sha = self.commit("1.0.1", 2, "chore(release): bump version to 1.0.1")
         body = release.notes(release.release_record(sha, True), "0" * 64, "owner/repo")
         self.assertIn("584.0.0.51.56 / 475817510", body)
+        self.assertIn("584.1.0.61.98 / 346817021", body)
         self.assertNotIn("commit time", body)
         self.assertNotIn("Asia/Saigon", body)
         self.assertNotIn(sha, body)

@@ -88,9 +88,10 @@ def notes(record, digest, repository):
     previous = previous_tag(record["version"])
     return ("## Changes\n\n" + change_lines(record["sha"], previous) + "\n\n"
             "## Requirements and installation\n\n"
-            "Android 11+, LSPosed, and Facebook **582.0.0.50.54 / 475417129**, "
-            "**583.0.0.39.55 / 475614366**, or **584.0.0.51.56 / 475817510**. Install the APK, "
-            "enable FacebookGoodies for Facebook in LSPosed, then restart Facebook.\n\n"
+            "Android 11+ and LSPosed. Facebook controls support **582.0.0.50.54 / 475417129**, "
+            "**583.0.0.39.55 / 475614366**, or **584.0.0.51.56 / 475817510**. "
+            "Messenger features require **584.1.0.61.98 / 346817021**. Install the APK, "
+            "enable FacebookGoodies for each selected app in LSPosed, then restart those apps.\n\n"
             "## APK\n\n"
             f"- Version: **{record['version']} / code {record['code']}**.\n"
             "- Signed release build; non-debuggable. Release unit tests and lint passed.\n"
