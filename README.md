@@ -1,6 +1,6 @@
 # FacebookGoodies
 
-An LSPosed module for Facebook feed controls and hiding Messenger's Meta AI floating button.
+An LSPosed module for Facebook feed controls and Messenger privacy controls.
 
 ## Features
 
@@ -13,10 +13,12 @@ An LSPosed module for Facebook feed controls and hiding Messenger's Meta AI floa
 - Hide Stories at the top or between posts, with separate switches.
 - Hide read receipts in Facebook chats.
 - Hide the Meta AI floating button in Messenger.
+- Suppress Messenger read receipts, typing status and story views on the supported build.
+- Keep Messenger chats locally read while automatic seen is suppressed; a small dot on emoji marks a pending receipt, and holding emoji sends seen manually.
 - Block supported screenshot-detection signals.
 - Download the current video at the highest available resolution, with audio.
 
-Friends’ shares stay visible. Read-receipt filtering applies to chats inside Facebook and may leave chats unread.
+Friends’ shares stay visible. Facebook chat read-receipt filtering can leave chats unread. Suppressed Messenger story views can stay unread locally.
 
 The content filters are off by default. Restart Facebook after changing the top Stories setting; refresh the feed for the other filters.
 
@@ -24,14 +26,14 @@ While a video is playing, tap Download above More in the player's action sidebar
 
 ## Requirements
 
-Android 11 or newer and LSPosed. Facebook features require Facebook **582.0.0.50.54**, **583.0.0.39.55**, or **584.0.0.51.56**; the Messenger button filter requires Messenger **584.1.0.61.98**. Both check their [matching build codes](SUPPORT.md).
+Android 11 or newer and LSPosed. Facebook features require Facebook **582.0.0.50.54**, **583.0.0.39.55**, or **584.0.0.51.56**; Messenger features require Messenger **584.1.0.61.98**. Both check their [matching build codes](SUPPORT.md).
 
 ## Setup
 
 1. Install the FacebookGoodies APK.
 2. Enable it in LSPosed and select **Facebook** and/or **Messenger** as its scope.
 3. Restart each selected app.
-4. Open FacebookGoodies to choose Facebook settings.
+4. Open FacebookGoodies and use the Facebook or Messenger tab for that app's controls and diagnostics.
 
 ## Build
 

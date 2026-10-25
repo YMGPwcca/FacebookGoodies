@@ -1,14 +1,16 @@
 <resources>
-    <color name="page_background">#111316</color>
-    <color name="surface">#1C1F24</color>
-    <color name="text_primary">#F1F3F5</color>
-    <color name="text_secondary">#B0B6C0</color>
-    <color name="outline">#343942</color>
-    <color name="accent">#78A9FF</color>
-    <color name="control_off_track">#6A7B8D</color>
-    <color name="control_off_thumb">#D6E1ED</color>
+    <color name="page_background">#101114</color>
+    <color name="surface">#1C2026</color>
+    <color name="text_primary">#F5F6F8</color>
+    <color name="text_secondary">#B3BCC9</color>
+    <color name="outline">#343A44</color>
+    <color name="accent">#83B4FF</color>
+    <color name="facebook_accent">#83B4FF</color>
+    <color name="messenger_accent">#B6A3FF</color>
+    <color name="control_off_track">#576173</color>
+    <color name="control_off_thumb">#D8DFE8</color>
     <color name="icon_background">#1877F2</color>
-    <color name="status_success">#7BD6A5</color>
-    <color name="status_warning">#FFD08A</color>
-    <color name="status_error">#FF9A91</color>
+    <color name="status_success">#42CF96</color>
+    <color name="status_warning">#F1C56A</color>
+    <color name="status_error">#FF948C</color>
 </resources>
