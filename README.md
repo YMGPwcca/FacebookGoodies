@@ -1,6 +1,6 @@
 # FacebookGoodies
 
-An LSPosed module for a cleaner Facebook feed.
+An LSPosed module for Facebook feed controls and hiding Messenger's Meta AI floating button.
 
 ## Features
 
@@ -12,6 +12,7 @@ An LSPosed module for a cleaner Facebook feed.
 - Hide Reels cards in News Feed.
 - Hide Stories at the top or between posts, with separate switches.
 - Hide read receipts in Facebook chats.
+- Hide the Meta AI floating button in Messenger.
 - Block supported screenshot-detection signals.
 - Download the current video at the highest available resolution, with audio.
 
@@ -23,14 +24,14 @@ While a video is playing, tap Download above More in the player's action sidebar
 
 ## Requirements
 
-Android 11 or newer, LSPosed, and Facebook **582.0.0.50.54**, **583.0.0.39.55**, or **584.0.0.51.56** with a [matching build code](SUPPORT.md).
+Android 11 or newer and LSPosed. Facebook features require Facebook **582.0.0.50.54**, **583.0.0.39.55**, or **584.0.0.51.56**; the Messenger button filter requires Messenger **584.1.0.61.98**. Both check their [matching build codes](SUPPORT.md).
 
 ## Setup
 
 1. Install the FacebookGoodies APK.
-2. Enable it in LSPosed and select **Facebook** as its scope.
-3. Restart Facebook.
-4. Open FacebookGoodies to choose your settings.
+2. Enable it in LSPosed and select **Facebook** and/or **Messenger** as its scope.
+3. Restart each selected app.
+4. Open FacebookGoodies to choose Facebook settings.
 
 ## Build
 

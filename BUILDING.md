@@ -22,7 +22,7 @@ Linux or macOS:
 ./gradlew :app:assembleDebug
 ```
 
-The output is `app/build/outputs/apk/debug/app-debug.apk`. Install this APK as an LSPosed module, enable its Facebook scope, and restart Facebook. Facebook itself remains a separate installed application.
+The output is `app/build/outputs/apk/debug/app-debug.apk`. Install this APK as an LSPosed module, enable Facebook and/or Messenger in its scope, and restart each selected app. Both host apps remain separately installed.
 
 ## Run the local policy tests
 

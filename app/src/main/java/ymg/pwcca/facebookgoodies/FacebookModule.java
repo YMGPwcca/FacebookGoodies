@@ -12,21 +12,27 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public final class FacebookModule implements IXposedHookLoadPackage {
+    private static final String FACEBOOK = "com.facebook.katana";
+    private static final String MESSENGER = "com.facebook.orca";
     private static final AtomicBoolean started = new AtomicBoolean();
     @Override public void handleLoadPackage(XC_LoadPackage.LoadPackageParam packageInfo) {
-        if (!"com.facebook.katana".equals(packageInfo.packageName) || !"com.facebook.katana".equals(packageInfo.processName)) return;
+        String target = packageInfo.packageName;
+        if ((!FACEBOOK.equals(target) && !MESSENGER.equals(target)) || !target.equals(packageInfo.processName)) return;
         // Application.attach runs before LoadedApk publishes the Application instance.
-        // Facebook starts AppInit workers in that window; wait until the framework calls onCreate.
+        // Host apps can start workers in that window; wait until the framework calls onCreate.
         XposedHelpers.findAndHookMethod(Instrumentation.class, "callApplicationOnCreate", Application.class, new XC_MethodHook() {
             @Override protected void beforeHookedMethod(MethodHookParam param) {
                 Application app = (Application) param.args[0];
-                if (!"com.facebook.katana".equals(app.getPackageName())) return;
+                if (!target.equals(app.getPackageName())) return;
                 if (app.getApplicationContext() == null) {
                     XposedBridge.log("FacebookGoodies: application context unavailable; hooks disabled");
                     return;
                 }
                 if (!started.compareAndSet(false, true)) return;
-                try { initialize(app); }
+                try {
+                    if (MESSENGER.equals(target)) initializeMessenger(app);
+                    else initialize(app);
+                }
                 catch (RuntimeException | LinkageError failure) { XposedBridge.log("FacebookGoodies: startup incomplete"); }
             }
         });
@@ -67,8 +73,21 @@ public final class FacebookModule implements IXposedHookLoadPackage {
     }
     private static FacebookBuild hostBuild(Context app) {
         try {
-            PackageInfo info = app.getPackageManager().getPackageInfo("com.facebook.katana", 0);
+            PackageInfo info = app.getPackageManager().getPackageInfo(FACEBOOK, 0);
             return FacebookBuild.identify(info.versionName, info.getLongVersionCode());
         } catch (android.content.pm.PackageManager.NameNotFoundException failure) { return FacebookBuild.UNSUPPORTED; }
+    }
+    private static void initializeMessenger(Application app) {
+        try {
+            PackageInfo info = app.getPackageManager().getPackageInfo(MESSENGER, 0);
+            if (!"584.1.0.61.98".equals(info.versionName) || info.getLongVersionCode() != 346817021L) {
+                XposedBridge.log("FacebookGoodies: unsupported Messenger build; AI FAB hook disabled");
+                return;
+            }
+            MessengerAiFabHooks.install(app.getClassLoader());
+            XposedBridge.log("FacebookGoodies: Messenger AI FAB hook installed");
+        } catch (android.content.pm.PackageManager.NameNotFoundException | ReflectiveOperationException | RuntimeException | LinkageError failure) {
+            XposedBridge.log("FacebookGoodies: Messenger AI FAB hook unavailable");
+        }
     }
 }

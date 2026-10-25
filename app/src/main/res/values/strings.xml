@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">FacebookGoodies</string>
-    <string name="module_description">Hide sponsored and suggested feed posts, with privacy controls for Facebook.</string>
+    <string name="module_description">Facebook feed controls and Messenger AI button removal.</string>
     <string name="waiting_for_facebook">Waiting for Facebook</string>
     <string name="enable_in_lsposed">Enable in LSPosed, select Facebook, then restart Facebook.</string>
     <string name="unsupported_build">Unsupported Facebook version</string>

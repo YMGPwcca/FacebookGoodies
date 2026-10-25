@@ -1,4 +1,4 @@
-# Supported Facebook builds
+# Supported host builds
 
 Current hooks target these Facebook for Android `com.facebook.katana` builds:
 
@@ -8,7 +8,9 @@ Current hooks target these Facebook for Android `com.facebook.katana` builds:
 | **583.0.0.39.55** | **475614366** | Android 11 |
 | **584.0.0.51.56** | **475817510** | Android 11 |
 
-The module checks both the installed version name and version code, then selects that build's hook bindings. Other builds leave the Facebook hooks disabled. Its LSPosed scope targets Facebook only.
+The module checks both the installed version name and version code, then selects that build's hook bindings. Other Facebook builds leave the Facebook hooks disabled.
+
+Messenger `com.facebook.orca` **584.1.0.61.98** / version code **346817021** is supported for hiding its Meta AI floating button only. Other Messenger builds leave this hook disabled. Enable Messenger separately in the module's LSPosed scope.
 
 The 583 and 584 hook bindings were checked against their matching APKs' DEX. On Facebook 584, News Feed loaded with the module active, and the user confirmed that ads are absent and video downloads work. Threads cards appeared intermittently in Reels on a previous build; they have not been seen yet on 584, so that behavior is not confirmed fixed. Other Reels-specific behavior on 584 and feature behavior on 583 still need on-device verification.
 
@@ -38,4 +40,4 @@ The progress dialog keeps source-finding, transfer, merge, save and cleanup stag
 
 Downloads support static single-period MP4 DASH with complete `SegmentBase` URLs, `SegmentList`, and finite `SegmentTimeline` templates using unformatted Number/Time placeholders. VP9 video in MP4 uses a lossless container merge when Android's native MP4 writer rejects that codec; the video resolution and encoded audio/video samples are preserved. Its parser mapping is bundled with the module for LSPosed class loading. Live, protected, WebM/HLS, multi-period and other unsupported manifest forms fail with a message; a supported lower resolution is not silently substituted for an unsupported highest source. Signed media URLs can expire: play the video again and retry. Downloads run in Facebook's process and can be interrupted if Android kills it. Android 11+ uses pending MediaStore entries. Native device checks and actual Facebook feed/Reels download acceptance are tracked separately in the local analysis report.
 
-Ads inside the Stories viewer, Marketplace and games, other suggested-content categories, the separate Messenger app, repost actions, account import/export, remote configuration, donations, and updates are outside this project.
+Ads inside the Stories viewer, Marketplace and games, other suggested-content categories, Messenger read receipts, typing, story views and inbox ads, repost actions, account import/export, remote configuration, donations, and updates are outside the implemented feature set.
