@@ -8,11 +8,11 @@ import de.robv.android.xposed.XposedBridge;
 
 /** Independent top-tray and inline-Story controls for the supported Facebook build. */
 final class FeedContentHooks584 {
-    static void install(ClassLoader loader, HostState state) {
+    static void install(ClassLoader loader, HostState state, FacebookBuild build) {
         topTray(loader, "A00", "X.1tV", state);
         topTray(loader, "A01", "X.4h6", state);
         inlineStories(loader, state);
-        ThreadsVideoHooks584.install(loader,state);
+        ThreadsVideoHooks584.install(loader,state,build);
     }
 
     private static void topTray(ClassLoader loader, String name, String resultName, HostState state) {

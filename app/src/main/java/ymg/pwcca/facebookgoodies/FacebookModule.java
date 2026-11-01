@@ -48,7 +48,7 @@ public final class FacebookModule implements IXposedHookLoadPackage {
         ClassLoader loader = app.getClassLoader();
         if (build == FacebookBuild.FACEBOOK_582) install582(app, loader, state);
         else if (build == FacebookBuild.FACEBOOK_583) install583(app, loader, state);
-        else install584(app, loader, state);
+        else install584(app, loader, state, build);
         try { PrivacyHooks.install(loader, state); } catch (RuntimeException | LinkageError failure) { state.failure("privacy-install"); }
         state.start(app);
         XposedBridge.log("FacebookGoodies: initialized hooks=" + state.hooks.get());
@@ -65,10 +65,10 @@ public final class FacebookModule implements IXposedHookLoadPackage {
         FeedContentHooks583.install(loader, state);
         VideoDownloadHooks583.install(app, loader, state);
     }
-    private static void install584(Application app, ClassLoader loader, HostState state) {
+    private static void install584(Application app, ClassLoader loader, HostState state, FacebookBuild build) {
         try { AdHooks584.install(loader, state); } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) { state.failure("feed-install"); }
         VideoAdHooks584.install(loader, state);
-        FeedContentHooks584.install(loader, state);
+        FeedContentHooks584.install(loader, state, build);
         VideoDownloadHooks584.install(app, loader, state);
     }
     private static FacebookBuild hostBuild(Context app) {
@@ -78,9 +78,11 @@ public final class FacebookModule implements IXposedHookLoadPackage {
         } catch (android.content.pm.PackageManager.NameNotFoundException failure) { return FacebookBuild.UNSUPPORTED; }
     }
     private static void initializeMessenger(Application app) {
+        MessengerBuild build;
         try {
             PackageInfo info = app.getPackageManager().getPackageInfo(MESSENGER, 0);
-            if (!"584.1.0.61.98".equals(info.versionName) || info.getLongVersionCode() != 346817021L) {
+            build = MessengerBuild.identify(info.versionName, info.getLongVersionCode());
+            if (build == MessengerBuild.UNSUPPORTED) {
                 XposedBridge.log("FacebookGoodies: unsupported Messenger build; hooks disabled");
                 return;
             }
@@ -90,12 +92,12 @@ public final class FacebookModule implements IXposedHookLoadPackage {
         }
         boolean aiFabInstalled = false;
         try {
-            MessengerAiFabHooks.install(app.getClassLoader());
+            MessengerAiFabHooks.install(app.getClassLoader(), build);
             aiFabInstalled = true;
             XposedBridge.log("FacebookGoodies: Messenger AI FAB hook installed");
         } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
             XposedBridge.log("FacebookGoodies: Messenger AI FAB hook unavailable");
         }
-        MessengerPrivacyHooks.install(app, app.getClassLoader(), aiFabInstalled);
+        MessengerPrivacyHooks.install(app, app.getClassLoader(), aiFabInstalled, build);
     }
 }

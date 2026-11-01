@@ -515,7 +515,7 @@ public final class SettingsActivity extends Activity {
     private boolean supportedHost(int index, PackageInfo host) {
         if (index == FACEBOOK)
             return FacebookBuild.identify(host.versionName, host.getLongVersionCode()) != FacebookBuild.UNSUPPORTED;
-        return "584.1.0.61.98".equals(host.versionName) && host.getLongVersionCode() == 346817021L;
+        return MessengerBuild.identify(host.versionName, host.getLongVersionCode()) != MessengerBuild.UNSUPPORTED;
     }
 
     private Drawable hostIcon(int index) {

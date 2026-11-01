@@ -23,17 +23,17 @@ final class MessengerPrivacyHooks {
     private boolean aiFabInstalled;
     private MessengerReadControls readControls;
 
-    static void install(Context app, ClassLoader loader, boolean aiFabInstalled) {
+    static void install(Context app, ClassLoader loader, boolean aiFabInstalled, MessengerBuild build) {
         MessengerPrivacyHooks hooks = new MessengerPrivacyHooks();
         hooks.aiFabInstalled = aiFabInstalled;
         hooks.refresh(app);
         XposedBridge.log("FacebookGoodies: Messenger privacy enabled seen=" + hooks.seen
                 + " typing=" + hooks.typing + " story=" + hooks.storySeen);
-        hooks.installSeen(loader);
-        hooks.readControls = new MessengerReadControls(app, loader, () -> hooks.seen);
+        hooks.installSeen(loader, build);
+        hooks.readControls = new MessengerReadControls(app, loader, () -> hooks.seen, build);
         hooks.readControls.install();
-        hooks.installTyping(loader);
-        hooks.installStorySeen(loader);
+        hooks.installTyping(loader, build);
+        hooks.installStorySeen(loader, build);
         hooks.report(app);
         Executors.newSingleThreadScheduledExecutor(r -> {
             Thread thread = new Thread(r, "FacebookGoodies-Messenger-settings");
@@ -71,16 +71,17 @@ final class MessengerPrivacyHooks {
         if (readControls != null) readControls.updateButtonVisibility();
     }
 
-    private void installSeen(ClassLoader loader) {
+    private void installSeen(ClassLoader loader, MessengerBuild build) {
         try {
-            Class<?> callback = Class.forName("X.FZ1", false, loader);
+            boolean messenger585 = build == MessengerBuild.MESSENGER_585;
+            Class<?> callback = Class.forName(messenger585 ? "X.Gmd" : "X.FZ1", false, loader);
             Field kind = callback.getDeclaredField("$t");
             Field futureField = callback.getDeclaredField("A03");
             kind.setAccessible(true);
             futureField.setAccessible(true);
             hookVoid(callback.getDeclaredMethod("onCompletion", Object.class), new XC_MethodHook() {
                 @Override protected void beforeHookedMethod(MethodHookParam param) throws IllegalAccessException {
-                    if (seen && kind.getInt(param.thisObject) == 3
+                    if (seen && kind.getInt(param.thisObject) == (messenger585 ? 5 : 3)
                             && cancelAndSkip(param, futureField.get(param.thisObject)))
                         readsBlocked.incrementAndGet();
                 }
@@ -103,9 +104,10 @@ final class MessengerPrivacyHooks {
         }
     }
 
-    private void installTyping(ClassLoader loader) {
+    private void installTyping(ClassLoader loader, MessengerBuild build) {
         try {
-            Class<?> mqtt = Class.forName("X.3hu", false, loader);
+            boolean messenger585 = build == MessengerBuild.MESSENGER_585;
+            Class<?> mqtt = Class.forName(messenger585 ? "X.3hT" : "X.3hu", false, loader);
             hookVoid(mqtt.getDeclaredMethod("A00", Integer.class, String.class, byte[].class), new XC_MethodHook() {
                 @Override protected void beforeHookedMethod(MethodHookParam param) {
                     if (typing && "/t_st".equals(param.args[1])) {
@@ -115,15 +117,27 @@ final class MessengerPrivacyHooks {
                 }
             });
 
-            Class<?> callback = Class.forName("X.9qD", false, loader);
-            Field futureField = callback.getDeclaredField("A01");
-            futureField.setAccessible(true);
-            hookVoid(callback.getDeclaredMethod("onCompletion", Object.class), new XC_MethodHook() {
-                @Override protected void beforeHookedMethod(MethodHookParam param) throws IllegalAccessException {
-                    if (typing && cancelAndSkip(param, futureField.get(param.thisObject)))
-                        typingBlocked.incrementAndGet();
-                }
-            });
+            Class<?> callback = Class.forName(messenger585 ? "X.Ak3" : "X.9qD", false, loader);
+            Method completion = callback.getDeclaredMethod("onCompletion", Object.class);
+            if (messenger585) {
+                hookVoid(completion, new XC_MethodHook() {
+                    @Override protected void beforeHookedMethod(MethodHookParam param) {
+                        if (typing) {
+                            param.setResult(null);
+                            typingBlocked.incrementAndGet();
+                        }
+                    }
+                });
+            } else {
+                Field futureField = callback.getDeclaredField("A01");
+                futureField.setAccessible(true);
+                hookVoid(completion, new XC_MethodHook() {
+                    @Override protected void beforeHookedMethod(MethodHookParam param) throws IllegalAccessException {
+                        if (typing && cancelAndSkip(param, futureField.get(param.thisObject)))
+                            typingBlocked.incrementAndGet();
+                    }
+                });
+            }
             XposedBridge.log("FacebookGoodies: Messenger typing hooks installed");
         } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
             errors.incrementAndGet();
@@ -131,7 +145,7 @@ final class MessengerPrivacyHooks {
         }
     }
 
-    private void installStorySeen(ClassLoader loader) {
+    private void installStorySeen(ClassLoader loader, MessengerBuild build) {
         try {
             Class<?> card = Class.forName("com.facebook.messaging.montage.model.MontageCard", false, loader);
             XC_MethodHook skip = new XC_MethodHook() {
@@ -142,9 +156,27 @@ final class MessengerPrivacyHooks {
                     }
                 }
             };
-            for (String name : new String[]{"X.Nwi", "X.Nwj"}) {
-                Class<?> handler = Class.forName(name, false, loader);
-                hookVoid(handler.getDeclaredMethod("C7r", card, boolean.class), skip);
+            if (build == MessengerBuild.MESSENGER_585) {
+                Class<?> callback = Class.forName("X.K4W", false, loader);
+                Field kind = callback.getDeclaredField("$t");
+                Field futureField = callback.getDeclaredField("A03");
+                kind.setAccessible(true);
+                futureField.setAccessible(true);
+                hookVoid(callback.getDeclaredMethod("onCompletion", Object.class), new XC_MethodHook() {
+                    @Override protected void beforeHookedMethod(MethodHookParam param) throws IllegalAccessException {
+                        int action = kind.getInt(param.thisObject);
+                        if (storySeen && (action == 14 || action == 15)
+                                && cancelAndSkip(param, futureField.get(param.thisObject)))
+                            storiesBlocked.incrementAndGet();
+                    }
+                });
+                Class<?> handler = Class.forName("X.VIG", false, loader);
+                hookVoid(handler.getDeclaredMethod("DTN", card, boolean.class), skip);
+            } else {
+                for (String name : new String[]{"X.Nwi", "X.Nwj"}) {
+                    Class<?> handler = Class.forName(name, false, loader);
+                    hookVoid(handler.getDeclaredMethod("C7r", card, boolean.class), skip);
+                }
             }
             XposedBridge.log("FacebookGoodies: Messenger story seen hooks installed");
         } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {

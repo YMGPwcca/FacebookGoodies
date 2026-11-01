@@ -7,12 +7,12 @@ import de.robv.android.xposed.XposedBridge;
 
 /** Reject only the native Threads promotion before Shorts items enter the pager. */
 final class ThreadsVideoHooks584 {
-    static void install(ClassLoader loader, HostState state) {
-        try { installResponse(loader,state); }
+    static void install(ClassLoader loader, HostState state, FacebookBuild build) {
+        try { installResponse(loader,state,build); }
         catch (ReflectiveOperationException | RuntimeException | LinkageError failed) { state.failure("threads-video-response-install"); }
     }
 
-    private static void installResponse(ClassLoader loader,HostState state) throws ReflectiveOperationException {
+    private static void installResponse(ClassLoader loader,HostState state,FacebookBuild build) throws ReflectiveOperationException {
         Class<?> edge=Class.forName("X.4lQ",false,loader);
         Class<?> node=Class.forName("X.76y",false,loader);
         Class<?> item=Class.forName("X.729",false,loader);
@@ -22,7 +22,10 @@ final class ThreadsVideoHooks584 {
         verifyKind(kind);
         Method unwrap=method(edge,"A00",node),value=method(node,"A00",item);
         Method midcard=method(item,"AEr",container),payload=method(container,"BRd",card),type=method(card,"B9c",kind);
-        Method response=method(Class.forName("X.4lf",false,loader),"BJE",List.class,Object.class);
+        Class<?> responseOwner=Class.forName("X.4lf",false,loader);
+        Method response=build==FacebookBuild.FACEBOOK_584_476015532
+                ? method(responseOwner,"BJE",List.class,Object.class)
+                : method(responseOwner,"BJE",List.class,List.class,Object.class);
         Method copy=Class.forName("com.google.common.collect.ImmutableList",false,loader).getMethod("copyOf",Iterable.class);
         XposedBridge.hookMethod(response,new XC_MethodHook(){
             @Override protected void afterHookedMethod(MethodHookParam param) {

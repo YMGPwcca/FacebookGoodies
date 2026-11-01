@@ -24,6 +24,7 @@ import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,6 +38,7 @@ final class MessengerReadControls {
     private final Context app;
     private final ClassLoader loader;
     private final BooleanSupplier enabled;
+    private final MessengerBuild build;
     private final SharedPreferences localReads;
     private final Handler main = new Handler(Looper.getMainLooper());
     private final AtomicInteger blocked = new AtomicInteger();
@@ -65,10 +67,11 @@ final class MessengerReadControls {
     private Field summaryReadTime;
     private Field summaryLastMessage;
 
-    MessengerReadControls(Context app, ClassLoader loader, BooleanSupplier enabled) {
+    MessengerReadControls(Context app, ClassLoader loader, BooleanSupplier enabled, MessengerBuild build) {
         this.app = app;
         this.loader = loader;
         this.enabled = enabled;
+        this.build = build;
         this.localReads = app.getSharedPreferences("facebookgoodies_local_reads", Context.MODE_PRIVATE);
     }
 
@@ -86,8 +89,10 @@ final class MessengerReadControls {
 
     private void installReadState() throws ReflectiveOperationException {
         Class<?> threadKey = Class.forName("com.facebook.messaging.model.threadkey.ThreadKey", false, loader);
-        Class<?> converter = Class.forName("X.7gJ", false, loader);
-        Method convert = converter.getDeclaredMethod("A01", threadKey);
+        Class<?> converter = Class.forName(
+                build == MessengerBuild.MESSENGER_585 ? "X.4lW" : "X.7gJ", false, loader);
+        Method convert = converter.getDeclaredMethod(
+                build == MessengerBuild.MESSENGER_585 ? "A02" : "A01", threadKey);
         XposedBridge.hookMethod(convert, new XC_MethodHook() {
             @Override protected void afterHookedMethod(MethodHookParam param) {
                 if (!enabled.getAsBoolean() || !(param.getResult() instanceof String) || param.args[0] == null) return;
@@ -125,7 +130,8 @@ final class MessengerReadControls {
     }
 
     private void installSend() throws ReflectiveOperationException {
-        Class<?> sender = Class.forName("X.9iU", false, loader);
+        Class<?> sender = Class.forName(
+                build == MessengerBuild.MESSENGER_585 ? "X.AaM" : "X.9iU", false, loader);
         function0 = Class.forName("kotlin.jvm.functions.Function0", false, loader);
         Method invoke = function0.getDeclaredMethod("invoke");
         sendMethod = sender.getDeclaredMethod("A00", Long.class, String.class, String.class, function0, function0);
@@ -191,16 +197,18 @@ final class MessengerReadControls {
     }
 
     private void installPillFilters() throws ReflectiveOperationException {
-        Class<?> controller = Class.forName("X.5ur", false, loader);
-        Method show = controller.getDeclaredMethod("A02", controller);
-        Method hide = controller.getDeclaredMethod("A01", controller);
-        XposedBridge.hookMethod(show, new XC_MethodHook() {
-            @Override protected void beforeHookedMethod(MethodHookParam param) {
-                if (!enabled.getAsBoolean()) return;
-                try { hide.invoke(null, param.args[0]); } catch (ReflectiveOperationException | RuntimeException failure) { logFailure("hide unread pill", failure); }
-                param.setResult(null);
-            }
-        });
+        if (build == MessengerBuild.MESSENGER_584_1) {
+            Class<?> controller = Class.forName("X.5ur", false, loader);
+            Method show = controller.getDeclaredMethod("A02", controller);
+            Method hide = controller.getDeclaredMethod("A01", controller);
+            XposedBridge.hookMethod(show, new XC_MethodHook() {
+                @Override protected void beforeHookedMethod(MethodHookParam param) {
+                    if (!enabled.getAsBoolean()) return;
+                    try { hide.invoke(null, param.args[0]); } catch (ReflectiveOperationException | RuntimeException failure) { logFailure("hide unread pill", failure); }
+                    param.setResult(null);
+                }
+            });
+        }
 
         Class<?> unopened = Class.forName("com.facebook.messaging.threadview.jumppill.UnopenedContentPillController", false, loader);
         Class<?> immutableList = Class.forName("com.google.common.collect.ImmutableList", false, loader);
@@ -218,19 +226,42 @@ final class MessengerReadControls {
     }
 
     private void installUnreadDivider() throws ReflectiveOperationException {
-        Class<?> component = Class.forName("X.9g1", false, loader);
-        Class<?> context = Class.forName("X.2DF", false, loader);
-        Method render = component.getDeclaredMethod("render", context);
-        if (render.getReturnType() != Class.forName("X.1J7", false, loader))
-            throw new NoSuchMethodException("Messenger unread divider render contract changed");
-        XposedBridge.hookMethod(render, new XC_MethodHook() {
-            @Override protected void beforeHookedMethod(MethodHookParam param) {
-                if (!enabled.getAsBoolean()) return;
-                param.setResult(null);
-                if (dividerBlocks.incrementAndGet() <= 3)
-                    XposedBridge.log("FacebookGoodies: Messenger unread divider removed");
-            }
-        });
+        if (build == MessengerBuild.MESSENGER_584_1) {
+            Class<?> component = Class.forName("X.9g1", false, loader);
+            Class<?> context = Class.forName("X.2DF", false, loader);
+            Method render = component.getDeclaredMethod("render", context);
+            if (render.getReturnType() != Class.forName("X.1J7", false, loader))
+                throw new NoSuchMethodException("Messenger unread divider render contract changed");
+            XposedBridge.hookMethod(render, new XC_MethodHook() {
+                @Override protected void beforeHookedMethod(MethodHookParam param) {
+                    if (!enabled.getAsBoolean()) return;
+                    param.setResult(null);
+                    if (dividerBlocks.incrementAndGet() <= 3)
+                        XposedBridge.log("FacebookGoodies: Messenger unread divider removed");
+                }
+            });
+        } else {
+            Class<?> rows = Class.forName("X.BLI", false, loader);
+            Method createRows = rows.getDeclaredMethod("AY8");
+            if (createRows.getReturnType() != ArrayList.class)
+                throw new NoSuchMethodException("Messenger unread divider row contract changed");
+            Class<?> divider = Class.forName("X.BBe", false, loader);
+            XposedBridge.hookMethod(createRows, new XC_MethodHook() {
+                @Override protected void afterHookedMethod(MethodHookParam param) {
+                    if (!enabled.getAsBoolean() || !(param.getResult() instanceof ArrayList<?>)) return;
+                    ArrayList<?> result = (ArrayList<?>) param.getResult();
+                    int removed = 0;
+                    for (int i = result.size() - 1; i >= 0; i--) {
+                        if (divider.isInstance(result.get(i))) {
+                            result.remove(i);
+                            removed++;
+                        }
+                    }
+                    if (removed > 0 && dividerBlocks.incrementAndGet() <= 3)
+                        XposedBridge.log("FacebookGoodies: Messenger unread divider removed");
+                }
+            });
+        }
         XposedBridge.log("FacebookGoodies: Messenger unread divider hook installed");
     }
 

@@ -1,7 +1,7 @@
 package ymg.pwcca.facebookgoodies;
 
 enum FacebookBuild {
-    FACEBOOK_582, FACEBOOK_583, FACEBOOK_584, UNSUPPORTED;
+    FACEBOOK_582, FACEBOOK_583, FACEBOOK_584, FACEBOOK_584_476015532, UNSUPPORTED;
 
     static FacebookBuild identify(String versionName, long versionCode) {
         if ("582.0.0.50.54".equals(versionName) && versionCode == 475417129L)
@@ -10,6 +10,8 @@ enum FacebookBuild {
             return FACEBOOK_583;
         if ("584.0.0.51.56".equals(versionName) && versionCode == 475817510L)
             return FACEBOOK_584;
+        if ("584.0.0.51.56".equals(versionName) && versionCode == 476015532L)
+            return FACEBOOK_584_476015532;
         return UNSUPPORTED;
     }
 }

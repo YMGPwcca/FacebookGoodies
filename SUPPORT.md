@@ -6,15 +6,17 @@ Current hooks target these Facebook for Android `com.facebook.katana` builds:
 | --- | ---: | --- |
 | **582.0.0.50.54** | **475417129** | Android 11 |
 | **583.0.0.39.55** | **475614366** | Android 11 |
-| **584.0.0.51.56** | **475817510** | Android 11 |
+| **584.0.0.51.56** | **475817510, 476015532** | Android 11 |
 
 The module checks both the installed version name and version code, then selects that build's hook bindings. Other Facebook builds leave the Facebook hooks disabled.
 
-Messenger `com.facebook.orca` **584.1.0.61.98** / version code **346817021** is supported for hiding its Meta AI floating button and suppressing read receipts, typing status and story views. Other Messenger builds leave these hooks disabled. Enable Messenger separately in the module's LSPosed scope.
+Messenger `com.facebook.orca` **584.1.0.61.98** / version code **346817021** and **585.0.0.53.94** / version code **347015062** are supported for hiding its Meta AI floating button, suppressing read receipts, typing status and story views, and the local-read/manual-seen controls. Each build uses exact, build-specific bindings. Other Messenger builds leave these hooks disabled. Enable Messenger separately in the module's LSPosed scope.
 
 Version **1.4.0** separates Facebook and Messenger settings into two tabs. Each tab shows the installed host version and whether that build is supported, followed by its own switches and diagnostics. Messenger diagnostics report loaded hook groups and intercepted read, typing and story signals; counts are actions in the current process, not unique messages or viewers. Existing switch values are retained by an update install.
 
 The 583 and 584 hook bindings were checked against their matching APKs' DEX. On Facebook 584, News Feed loaded with the module active, and the user confirmed that ads are absent and video downloads work. Threads cards appeared intermittently in Reels on a previous build; they have not been seen yet on 584, so that behavior is not confirmed fixed. Other Reels-specific behavior on 584 and feature behavior on 583 still need on-device verification.
+
+Static inspection of the installed Facebook build **584.0.0.51.56 / 476015532** found its one-argument Threads response binding; the installed Messenger **585.0.0.53.94 / 347015062** hook targets were matched against its DEX. Neither new target has been live-verified with LSPosed.
 
 ## Implemented features
 
