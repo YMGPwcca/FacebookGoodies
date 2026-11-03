@@ -12,6 +12,12 @@
     <string name="no_count">—</string>
     <string name="no_report_yet">No activity reported yet.</string>
     <string name="refresh">Refresh status</string>
+    <string name="restart_facebook">Restart Facebook</string>
+    <string name="restart_messenger">Restart Messenger</string>
+    <string name="restarting">Restarting…</string>
+    <string name="restart_unavailable">%1$s is not installed.</string>
+    <string name="restart_failed">Could not restart %1$s. Grant FacebookGoodies root access in your root manager.</string>
+    <string name="restart_launch_failed">Stopped %1$s, but could not open it.</string>
     <string name="last_report">Last report: %1$s</string>
     <string name="show_diagnostics">Show diagnostics</string>
     <string name="hide_diagnostics">Hide diagnostics</string>
@@ -46,6 +52,8 @@
     <string name="messenger_typing_description">Prevent Messenger from sending typing activity.</string>
     <string name="messenger_story_seen">Hide story views</string>
     <string name="messenger_story_seen_description">Prevent Messenger from marking stories seen. Stories may stay unread.</string>
+    <string name="messenger_hide_ai">Hide Meta AI button</string>
+    <string name="messenger_hide_ai_description">Hide the floating Meta AI button. Restart Messenger after changing.</string>
     <string name="section_content">Feed content</string>
     <string name="section_downloads">Downloads</string>
     <string name="download_current_video">Download current video</string>

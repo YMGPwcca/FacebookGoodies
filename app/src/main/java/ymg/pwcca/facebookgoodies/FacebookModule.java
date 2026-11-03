@@ -91,12 +91,19 @@ public final class FacebookModule implements IXposedHookLoadPackage {
             return;
         }
         boolean aiFabInstalled = false;
+        boolean hideAi = true;
         try {
-            MessengerAiFabHooks.install(app.getClassLoader(), build);
-            aiFabInstalled = true;
-            XposedBridge.log("FacebookGoodies: Messenger AI FAB hook installed");
-        } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
-            XposedBridge.log("FacebookGoodies: Messenger AI FAB hook unavailable");
+            android.os.Bundle config = app.getContentResolver().call(SettingsProvider.URI, "config", null, null);
+            if (config != null) hideAi = config.getBoolean("messenger_hide_ai", true);
+        } catch (RuntimeException ignored) { }
+        if (hideAi) {
+            try {
+                MessengerAiFabHooks.install(app.getClassLoader(), build);
+                aiFabInstalled = true;
+                XposedBridge.log("FacebookGoodies: Messenger AI FAB hook installed");
+            } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
+                XposedBridge.log("FacebookGoodies: Messenger AI FAB hook unavailable");
+            }
         }
         MessengerPrivacyHooks.install(app, app.getClassLoader(), aiFabInstalled, build);
     }

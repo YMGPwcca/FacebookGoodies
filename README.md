@@ -12,7 +12,7 @@ An LSPosed module for Facebook feed controls and Messenger privacy controls.
 - Hide Reels cards in News Feed.
 - Hide Stories at the top or between posts, with separate switches.
 - Hide read receipts in Facebook chats.
-- Hide the Meta AI floating button in Messenger.
+- Hide the Meta AI floating button in Messenger with a separate switch.
 - Suppress Messenger read receipts, typing status and story views on the supported build.
 - Keep Messenger chats locally read while automatic seen is suppressed; a small dot on emoji marks a pending receipt, and holding emoji sends seen manually.
 - Block supported screenshot-detection signals.
@@ -21,6 +21,8 @@ An LSPosed module for Facebook feed controls and Messenger privacy controls.
 Friends’ shares stay visible. Facebook chat read-receipt filtering can leave chats unread. Suppressed Messenger story views can stay unread locally.
 
 The content filters are off by default. Restart Facebook after changing the top Stories setting; refresh the feed for the other filters.
+
+Each settings tab also has a restart button for its host app. Restarting this way requires root access. Restart Messenger after changing the Meta AI switch; it defaults to on to preserve the previous behavior.
 
 While a video is playing, tap Download above More in the player's action sidebar. Videos save to `Downloads/FacebookGoodies`. Only the current video is selected; there is no video history. The progress dialog shows source finding, video and audio transfers, merging and saving, with elapsed time and transfer speed. Downloads can be cancelled from the dialog.
 

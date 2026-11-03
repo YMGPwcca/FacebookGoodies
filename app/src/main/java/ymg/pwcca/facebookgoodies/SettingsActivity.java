@@ -2,6 +2,7 @@ package ymg.pwcca.facebookgoodies;
 
 import android.app.Activity;
 import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -26,9 +27,12 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public final class SettingsActivity extends Activity {
     private static final int FACEBOOK = 0;
@@ -200,6 +204,7 @@ public final class SettingsActivity extends Activity {
         scroll.addView(content, new ScrollView.LayoutParams(-1, -2));
         Page page = new Page(index, index == FACEBOOK ? facebookColor : messengerColor, scroll, content);
         addSupportRow(page);
+        addRestartButton(page);
         if (index == FACEBOOK) {
             LinearLayout feed = addGroup(page, R.string.section_feed);
             addSetting(page, feed, "ads", R.string.block_sponsored_posts, R.string.block_sponsored_posts_description, true);
@@ -224,6 +229,9 @@ public final class SettingsActivity extends Activity {
             addSetting(page, chats, "messenger_seen", R.string.messenger_seen, R.string.messenger_seen_description, true);
             addDivider(chats);
             addSetting(page, chats, "messenger_typing", R.string.messenger_typing, R.string.messenger_typing_description, true);
+            addDivider(chats);
+            addSetting(page, chats, "messenger_hide_ai", R.string.messenger_hide_ai,
+                    R.string.messenger_hide_ai_description, true);
             LinearLayout stories = addGroup(page, R.string.section_stories);
             addSetting(page, stories, "messenger_story_seen", R.string.messenger_story_seen, R.string.messenger_story_seen_description, true);
         }
@@ -252,6 +260,57 @@ public final class SettingsActivity extends Activity {
         LinearLayout.LayoutParams groupParams = size(-2, -2);
         groupParams.setMarginStart(dp(12));
         row.addView(support, groupParams);
+    }
+
+    private void addRestartButton(Page page) {
+        int label = page.index == FACEBOOK ? R.string.restart_facebook : R.string.restart_messenger;
+        Button restart = textButton(label, page.accent);
+        LinearLayout.LayoutParams params = size(-1, 48);
+        params.topMargin = dp(12);
+        page.content.addView(restart, params);
+        restart.setOnClickListener(view -> restartHost(page.index, restart, label));
+    }
+
+    private void restartHost(int index, Button button, int label) {
+        String name = getString(index == FACEBOOK ? R.string.tab_facebook : R.string.tab_messenger);
+        String packageName = index == FACEBOOK ? "com.facebook.katana" : "com.facebook.orca";
+        Intent launch = getPackageManager().getLaunchIntentForPackage(packageName);
+        if (launch == null) {
+            Toast.makeText(this, getString(R.string.restart_unavailable, name), Toast.LENGTH_LONG).show();
+            return;
+        }
+        launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        button.setEnabled(false);
+        button.setText(R.string.restarting);
+        Thread worker = new Thread(() -> {
+            boolean stopped = false;
+            Process process = null;
+            try {
+                process = new ProcessBuilder("su", "-c", "/system/bin/am force-stop " + packageName).start();
+                if (process.waitFor(30, TimeUnit.SECONDS)) stopped = process.exitValue() == 0;
+            } catch (IOException failure) {
+                // The button reports missing or denied root access below.
+            } catch (InterruptedException failure) {
+                Thread.currentThread().interrupt();
+            } finally {
+                if (process != null) process.destroy();
+            }
+            boolean success = stopped;
+            runOnUiThread(() -> {
+                button.setText(label);
+                button.setEnabled(true);
+                if (!success) {
+                    Toast.makeText(this, getString(R.string.restart_failed, name), Toast.LENGTH_LONG).show();
+                    return;
+                }
+                try { startActivity(launch); }
+                catch (RuntimeException failure) {
+                    Toast.makeText(this, getString(R.string.restart_launch_failed, name), Toast.LENGTH_LONG).show();
+                }
+            });
+        }, "FacebookGoodies-restart-" + packageName);
+        worker.setDaemon(true);
+        worker.start();
     }
 
     private LinearLayout addGroup(Page page, int headingResource) {

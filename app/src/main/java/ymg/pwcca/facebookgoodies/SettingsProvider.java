@@ -41,7 +41,7 @@ public final class SettingsProvider extends ContentProvider {
         out.putBoolean("receipts", prefs.getBoolean("receipts", true));
         out.putBoolean("capture", prefs.getBoolean("capture", true));
         out.putBoolean("downloads", prefs.getBoolean("downloads", true));
-        for (String key : new String[]{"messenger_seen", "messenger_typing", "messenger_story_seen"})
+        for (String key : new String[]{"messenger_seen", "messenger_typing", "messenger_story_seen", "messenger_hide_ai"})
             out.putBoolean(key, prefs.getBoolean(key, true));
         for (String key : new String[]{"hide_threads", "hide_stories_top", "hide_stories_middle", "hide_reels"})
             out.putBoolean(key, prefs.getBoolean(key, false));

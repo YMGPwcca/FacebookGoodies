@@ -14,6 +14,8 @@ Messenger `com.facebook.orca` **584.1.0.61.98** / version code **346817021** and
 
 Version **1.4.0** separates Facebook and Messenger settings into two tabs. Each tab shows the installed host version and whether that build is supported, followed by its own switches and diagnostics. Messenger diagnostics report loaded hook groups and intercepted read, typing and story signals; counts are actions in the current process, not unique messages or viewers. Existing switch values are retained by an update install.
 
+The Messenger **Hide Meta AI button** switch defaults to on, preserving the previous behavior. Restart Messenger after changing it. Each settings tab also offers a host restart button; it requires root access granted to FacebookGoodies.
+
 The 583 and 584 hook bindings were checked against their matching APKs' DEX. On Facebook 584, News Feed loaded with the module active, and the user confirmed that ads are absent and video downloads work. Threads cards appeared intermittently in Reels on a previous build; they have not been seen yet on 584, so that behavior is not confirmed fixed. Other Reels-specific behavior on 584 and feature behavior on 583 still need on-device verification.
 
 Static inspection of the installed Facebook build **584.0.0.51.56 / 476015532** found its one-argument Threads response binding; the installed Messenger **585.0.0.53.94 / 347015062** hook targets were matched against its DEX. Neither new target has been live-verified with LSPosed.
