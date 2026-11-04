@@ -7,8 +7,13 @@ Current hooks target these Facebook for Android `com.facebook.katana` builds:
 | **582.0.0.50.54** | **475417129** | Android 11 |
 | **583.0.0.39.55** | **475614366** | Android 11 |
 | **584.0.0.51.56** | **475817510, 476015532** | Android 11 |
+| **585.0.0.47.54** | **476015694** | Android 11 |
 
 The module checks both the installed version name and version code, then selects that build's hook bindings. Other Facebook builds leave the Facebook hooks disabled.
+
+The 585 bindings cover the existing Facebook features, including video downloads.
+They were checked against the target APK's DEX declarations and selected method
+bodies. Runtime behavior on 585 has not yet been verified.
 
 Messenger `com.facebook.orca` **584.1.0.61.98** / version code **346817021** and **585.0.0.53.94** / version code **347015062** are supported for hiding its Meta AI floating button, suppressing read receipts, typing status and story views, and the local-read/manual-seen controls. Each build uses exact, build-specific bindings. Other Messenger builds leave these hooks disabled. Enable Messenger separately in the module's LSPosed scope.
 
@@ -34,7 +39,7 @@ Static inspection of the installed Facebook build **584.0.0.51.56 / 476015532** 
 - Adds switches to suppress the in-app Messenger mark-thread-read call and supported screenshot-detection callbacks.
 - Adds Messenger switches for the version-specific read-receipt, typing and story-view paths. They default to on when Messenger is in the LSPosed scope. Suppressed story views may remain unread locally.
 - Keeps Messenger threads visually read on the device while automatic seen is blocked, including the inbox row and the in-chat unread divider. A small dot appears on the chat's emoji icon when a read receipt is pending; hold emoji to send it manually. A short tap still opens emoji. Local read watermarks are stored in Messenger's private preferences under hashed thread keys; message text is not stored.
-- Adds Download immediately above More in the native Reels/video action sidebar, for the current visible video in the `X.58I` player on 582, `X.5B3` on 583, or `X.55R` on 584. It snapshots that video's sources on tap, selects the largest pixel resolution from its DASH manifest (bandwidth breaks ties), downloads the highest-bandwidth audio track, and muxes encoded samples into MP4 without re-encoding. When no adaptive manifest exists, it uses the player's HD URL, then SD URL.
+- Adds Download immediately above More in the native Reels/video action sidebar, for the current visible video in the `X.58I` player on 582, `X.5B3` on 583, `X.55R` on 584, or `X.05gS` on 585. It snapshots that video's sources on tap, selects the largest pixel resolution from its DASH manifest (bandwidth breaks ties), downloads the highest-bandwidth audio track, and muxes encoded samples into MP4 without re-encoding. When no adaptive manifest exists, it uses the player's HD URL, then SD URL.
 
 Unknown categories and unsupported model shapes remain visible. Counts in the settings screen are interception actions, not unique posts.
 

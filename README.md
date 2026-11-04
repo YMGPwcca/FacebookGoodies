@@ -28,7 +28,7 @@ While a video is playing, tap Download above More in the player's action sidebar
 
 ## Requirements
 
-Android 11 or newer and LSPosed. Facebook features require Facebook **582.0.0.50.54**, **583.0.0.39.55**, or **584.0.0.51.56**; Messenger features require Messenger **584.1.0.61.98** or **585.0.0.53.94**. Both check their [matching build codes](SUPPORT.md).
+Android 11 or newer and LSPosed. Facebook features require Facebook **582.0.0.50.54**, **583.0.0.39.55**, **584.0.0.51.56**, or **585.0.0.47.54**; Messenger features require Messenger **584.1.0.61.98** or **585.0.0.53.94**. Both check their [matching build codes](SUPPORT.md).
 
 ## Setup
 

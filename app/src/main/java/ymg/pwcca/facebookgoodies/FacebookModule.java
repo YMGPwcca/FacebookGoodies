@@ -48,6 +48,7 @@ public final class FacebookModule implements IXposedHookLoadPackage {
         ClassLoader loader = app.getClassLoader();
         if (build == FacebookBuild.FACEBOOK_582) install582(app, loader, state);
         else if (build == FacebookBuild.FACEBOOK_583) install583(app, loader, state);
+        else if (build == FacebookBuild.FACEBOOK_585) install585(app, loader, state, build);
         else install584(app, loader, state, build);
         try { PrivacyHooks.install(loader, state); } catch (RuntimeException | LinkageError failure) { state.failure("privacy-install"); }
         state.start(app);
@@ -70,6 +71,12 @@ public final class FacebookModule implements IXposedHookLoadPackage {
         VideoAdHooks584.install(loader, state);
         FeedContentHooks584.install(loader, state, build);
         VideoDownloadHooks584.install(app, loader, state);
+    }
+    private static void install585(Application app, ClassLoader loader, HostState state, FacebookBuild build) {
+        try { AdHooks585.install(loader, state); } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) { state.failure("feed-install"); }
+        VideoAdHooks585.install(loader, state);
+        FeedContentHooks585.install(loader, state, build);
+        VideoDownloadHooks585.install(app, loader, state);
     }
     private static FacebookBuild hostBuild(Context app) {
         try {
