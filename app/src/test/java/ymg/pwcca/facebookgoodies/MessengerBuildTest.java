@@ -9,6 +9,8 @@ public final class MessengerBuildTest {
                 MessengerBuild.identify("584.1.0.61.98", 346817021L));
         assertEquals(MessengerBuild.MESSENGER_585,
                 MessengerBuild.identify("585.0.0.53.94", 347015062L));
+        assertEquals(MessengerBuild.MESSENGER_586,
+                MessengerBuild.identify("586.0.0.55.92", 347215273L));
     }
 
     @Test public void rejectsMismatchedAndUnknownBuilds() {
@@ -18,6 +20,10 @@ public final class MessengerBuildTest {
                 MessengerBuild.identify("585.0.0.53.94", 346817021L));
         assertEquals(MessengerBuild.UNSUPPORTED,
                 MessengerBuild.identify("585.0.0.53.94", 347015061L));
+        assertEquals(MessengerBuild.UNSUPPORTED,
+                MessengerBuild.identify("586.0.0.55.92", 347215272L));
+        assertEquals(MessengerBuild.UNSUPPORTED,
+                MessengerBuild.identify("586.0.0.55.91", 347215273L));
         assertEquals(MessengerBuild.UNSUPPORTED,
                 MessengerBuild.identify(null, 347015062L));
     }

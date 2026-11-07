@@ -8,6 +8,7 @@ Current hooks target these Facebook for Android `com.facebook.katana` builds:
 | **583.0.0.39.55** | **475614366** | Android 11 |
 | **584.0.0.51.56** | **475817510, 476015532** | Android 11 |
 | **585.0.0.47.54** | **476015694** | Android 11 |
+| **586.0.0.52.53** | **476217123** | Android 11 |
 
 The module checks both the installed version name and version code, then selects that build's hook bindings. Other Facebook builds leave the Facebook hooks disabled.
 
@@ -15,7 +16,30 @@ The 585 bindings cover the existing Facebook features, including video downloads
 They were checked against the target APK's DEX declarations and selected method
 bodies. Runtime behavior on 585 has not yet been verified.
 
-Messenger `com.facebook.orca` **584.1.0.61.98** / version code **346817021** and **585.0.0.53.94** / version code **347015062** are supported for hiding its Meta AI floating button, suppressing read receipts, typing status and story views, and the local-read/manual-seen controls. Each build uses exact, build-specific bindings. Other Messenger builds leave these hooks disabled. Enable Messenger separately in the module's LSPosed scope.
+The Facebook and Messenger 586 bindings retain the existing features and were
+checked against the installed APKs using DEX declarations and selected method
+bodies. Runtime feature behavior on these 586 builds has not yet been verified.
+
+The Facebook 586 video port uses `05U4`/`03En` for Reels pools and
+`06I0`/`06Hz` for Watch pools. Instream responses use `0RTj`, `0UUH` and
+`0UUA`, retaining their native null-result completion paths and PlayerOrigin
+source/subsource filtering. Reels completion now uses concrete
+`0ReI.A02(0ARi)` and `0ReJ.A02(0ARi)`, invoking each receiver's native
+`A01()` no-ad handler; the 585 inherited callback owner is not reused.
+The metadata node is `04Ae`, restricted by the existing media field/type
+IDs. Launch options use `096o.A01`; banner rendering uses `0RUD.A1E`,
+instream cards use `0TLE.A1E` and `0TLe.A1E` (case-sensitive), and the
+affiliate attachment uses `0dWQ.render`. Empty components use `035j`.
+
+The retained 586 video verifier passed 42 static declaration/semantic checks.
+Debug APK assembly succeeded; 13 video policy/scoped-options tests were
+executed with no failures. A disposable JVM smoke run exercised the real
+response-filter and metadata callbacks with synthetic host inputs, covering
+unknown/null origins, Reels suborigins, cached-list preservation, disabled
+filtering, launch-time metadata and host exceptions. This is not an
+Android/Xposed installation or playback/UI verification.
+
+Messenger `com.facebook.orca` **584.1.0.61.98** / version code **346817021**, **585.0.0.53.94** / version code **347015062**, and **586.0.0.55.92** / version code **347215273** are supported for hiding its Meta AI floating button, suppressing read receipts, typing status and story views, and the local-read/manual-seen controls. Each build uses exact, build-specific bindings. Other Messenger builds leave these hooks disabled. Enable Messenger separately in the module's LSPosed scope.
 
 Version **1.4.0** separates Facebook and Messenger settings into two tabs. Each tab shows the installed host version and whether that build is supported, followed by its own switches and diagnostics. Messenger diagnostics report loaded hook groups and intercepted read, typing and story signals; counts are actions in the current process, not unique messages or viewers. Existing switch values are retained by an update install.
 
@@ -39,7 +63,7 @@ Static inspection of the installed Facebook build **584.0.0.51.56 / 476015532** 
 - Adds switches to suppress the in-app Messenger mark-thread-read call and supported screenshot-detection callbacks.
 - Adds Messenger switches for the version-specific read-receipt, typing and story-view paths. They default to on when Messenger is in the LSPosed scope. Suppressed story views may remain unread locally.
 - Keeps Messenger threads visually read on the device while automatic seen is blocked, including the inbox row and the in-chat unread divider. A small dot appears on the chat's emoji icon when a read receipt is pending; hold emoji to send it manually. A short tap still opens emoji. Local read watermarks are stored in Messenger's private preferences under hashed thread keys; message text is not stored.
-- Adds Download immediately above More in the native Reels/video action sidebar, for the current visible video in the `X.58I` player on 582, `X.5B3` on 583, `X.55R` on 584, or `X.05gS` on 585. It snapshots that video's sources on tap, selects the largest pixel resolution from its DASH manifest (bandwidth breaks ties), downloads the highest-bandwidth audio track, and muxes encoded samples into MP4 without re-encoding. When no adaptive manifest exists, it uses the player's HD URL, then SD URL.
+- Adds Download immediately above More in the native Reels/video action sidebar, for the current visible video in the `X.58I` player on 582, `X.5B3` on 583, `X.55R` on 584, `X.05gS` on 585, or `X.05iT` on 586. It snapshots that video's sources on tap, selects the largest pixel resolution from its DASH manifest (bandwidth breaks ties), downloads the highest-bandwidth audio track, and muxes encoded samples into MP4 without re-encoding. When no adaptive manifest exists, it uses the player's HD URL, then SD URL.
 
 Unknown categories and unsupported model shapes remain visible. Counts in the settings screen are interception actions, not unique posts.
 

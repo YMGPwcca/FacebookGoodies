@@ -89,10 +89,11 @@ final class MessengerReadControls {
 
     private void installReadState() throws ReflectiveOperationException {
         Class<?> threadKey = Class.forName("com.facebook.messaging.model.threadkey.ThreadKey", false, loader);
-        Class<?> converter = Class.forName(
-                build == MessengerBuild.MESSENGER_585 ? "X.4lW" : "X.7gJ", false, loader);
-        Method convert = converter.getDeclaredMethod(
-                build == MessengerBuild.MESSENGER_585 ? "A02" : "A01", threadKey);
+        boolean messenger585 = build == MessengerBuild.MESSENGER_585;
+        boolean messenger586 = build == MessengerBuild.MESSENGER_586;
+        Class<?> converter = Class.forName(messenger586 ? "X.4mE"
+                : messenger585 ? "X.4lW" : "X.7gJ", false, loader);
+        Method convert = converter.getDeclaredMethod(messenger586 || messenger585 ? "A02" : "A01", threadKey);
         XposedBridge.hookMethod(convert, new XC_MethodHook() {
             @Override protected void afterHookedMethod(MethodHookParam param) {
                 if (!enabled.getAsBoolean() || !(param.getResult() instanceof String) || param.args[0] == null) return;
@@ -130,8 +131,10 @@ final class MessengerReadControls {
     }
 
     private void installSend() throws ReflectiveOperationException {
-        Class<?> sender = Class.forName(
-                build == MessengerBuild.MESSENGER_585 ? "X.AaM" : "X.9iU", false, loader);
+        boolean messenger585 = build == MessengerBuild.MESSENGER_585;
+        boolean messenger586 = build == MessengerBuild.MESSENGER_586;
+        Class<?> sender = Class.forName(messenger586 ? "X.AeP"
+                : messenger585 ? "X.AaM" : "X.9iU", false, loader);
         function0 = Class.forName("kotlin.jvm.functions.Function0", false, loader);
         Method invoke = function0.getDeclaredMethod("invoke");
         sendMethod = sender.getDeclaredMethod("A00", Long.class, String.class, String.class, function0, function0);
@@ -241,11 +244,13 @@ final class MessengerReadControls {
                 }
             });
         } else {
-            Class<?> rows = Class.forName("X.BLI", false, loader);
-            Method createRows = rows.getDeclaredMethod("AY8");
+            boolean messenger586 = build == MessengerBuild.MESSENGER_586;
+            Class<?> rows = Class.forName(messenger586 ? "X.BGc" : "X.BLI", false, loader);
+            String createRowsName = messenger586 ? "AYs" : "AY8";
+            Method createRows = rows.getDeclaredMethod(createRowsName);
             if (createRows.getReturnType() != ArrayList.class)
                 throw new NoSuchMethodException("Messenger unread divider row contract changed");
-            Class<?> divider = Class.forName("X.BBe", false, loader);
+            Class<?> divider = Class.forName(messenger586 ? "X.BGp" : "X.BBe", false, loader);
             XposedBridge.hookMethod(createRows, new XC_MethodHook() {
                 @Override protected void afterHookedMethod(MethodHookParam param) {
                     if (!enabled.getAsBoolean() || !(param.getResult() instanceof ArrayList<?>)) return;

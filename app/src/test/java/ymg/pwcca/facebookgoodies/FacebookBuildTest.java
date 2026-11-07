@@ -10,6 +10,7 @@ public final class FacebookBuildTest {
         assertEquals(FacebookBuild.FACEBOOK_584, FacebookBuild.identify("584.0.0.51.56", 475817510L));
         assertEquals(FacebookBuild.FACEBOOK_584_476015532, FacebookBuild.identify("584.0.0.51.56", 476015532L));
         assertEquals(FacebookBuild.FACEBOOK_585, FacebookBuild.identify("585.0.0.47.54", 476015694L));
+        assertEquals(FacebookBuild.FACEBOOK_586, FacebookBuild.identify("586.0.0.52.53", 476217123L));
     }
 
     @Test public void rejectsMismatchedAndUnknownBuilds() {
@@ -21,5 +22,7 @@ public final class FacebookBuildTest {
         assertEquals(FacebookBuild.UNSUPPORTED, FacebookBuild.identify(null, 475614366L));
         assertEquals(FacebookBuild.UNSUPPORTED, FacebookBuild.identify("585.0.0.47.54", 476015693L));
         assertEquals(FacebookBuild.UNSUPPORTED, FacebookBuild.identify("584.0.0.51.56", 476015694L));
+        assertEquals(FacebookBuild.UNSUPPORTED, FacebookBuild.identify("586.0.0.52.53", 476217122L));
+        assertEquals(FacebookBuild.UNSUPPORTED, FacebookBuild.identify("585.0.0.47.54", 476217123L));
     }
 }

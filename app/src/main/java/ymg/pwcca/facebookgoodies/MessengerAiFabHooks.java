@@ -8,11 +8,25 @@ final class MessengerAiFabHooks {
     private MessengerAiFabHooks() { }
 
     static void install(ClassLoader loader, MessengerBuild build) throws ReflectiveOperationException {
-        boolean messenger585 = build == MessengerBuild.MESSENGER_585;
-        Class<?> component = Class.forName(messenger585 ? "X.75Q" : "X.6if", false, loader);
-        Class<?> context = Class.forName(messenger585 ? "X.2ED" : "X.2DF", false, loader);
+        String componentName;
+        String contextName;
+        String resultName;
+        if (build == MessengerBuild.MESSENGER_585) {
+            componentName = "X.75Q";
+            contextName = "X.2ED";
+            resultName = "X.1IG";
+        } else if (build == MessengerBuild.MESSENGER_586) {
+            componentName = "X.6wY";
+            contextName = "X.2Cb";
+            resultName = "X.1Gl";
+        } else {
+            componentName = "X.6if";
+            contextName = "X.2DF";
+            resultName = "X.1J7";
+        }
+        Class<?> component = Class.forName(componentName, false, loader);
+        Class<?> context = Class.forName(contextName, false, loader);
         Method render = component.getDeclaredMethod("render", context);
-        String resultName = messenger585 ? "X.1IG" : "X.1J7";
         if (render.getReturnType() != Class.forName(resultName, false, loader))
             throw new NoSuchMethodException("Messenger AI FAB render contract changed");
         XposedBridge.hookMethod(render, new XC_MethodHook() {

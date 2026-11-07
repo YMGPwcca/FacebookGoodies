@@ -74,14 +74,17 @@ final class MessengerPrivacyHooks {
     private void installSeen(ClassLoader loader, MessengerBuild build) {
         try {
             boolean messenger585 = build == MessengerBuild.MESSENGER_585;
-            Class<?> callback = Class.forName(messenger585 ? "X.Gmd" : "X.FZ1", false, loader);
+            boolean messenger586 = build == MessengerBuild.MESSENGER_586;
+            String callbackName = messenger586 ? "X.F4U" : messenger585 ? "X.Gmd" : "X.FZ1";
+            int readAction = messenger586 ? 4 : messenger585 ? 5 : 3;
+            Class<?> callback = Class.forName(callbackName, false, loader);
             Field kind = callback.getDeclaredField("$t");
             Field futureField = callback.getDeclaredField("A03");
             kind.setAccessible(true);
             futureField.setAccessible(true);
             hookVoid(callback.getDeclaredMethod("onCompletion", Object.class), new XC_MethodHook() {
                 @Override protected void beforeHookedMethod(MethodHookParam param) throws IllegalAccessException {
-                    if (seen && kind.getInt(param.thisObject) == (messenger585 ? 5 : 3)
+                    if (seen && kind.getInt(param.thisObject) == readAction
                             && cancelAndSkip(param, futureField.get(param.thisObject)))
                         readsBlocked.incrementAndGet();
                 }
@@ -107,7 +110,9 @@ final class MessengerPrivacyHooks {
     private void installTyping(ClassLoader loader, MessengerBuild build) {
         try {
             boolean messenger585 = build == MessengerBuild.MESSENGER_585;
-            Class<?> mqtt = Class.forName(messenger585 ? "X.3hT" : "X.3hu", false, loader);
+            boolean messenger586 = build == MessengerBuild.MESSENGER_586;
+            String mqttName = messenger586 ? "X.3hq" : messenger585 ? "X.3hT" : "X.3hu";
+            Class<?> mqtt = Class.forName(mqttName, false, loader);
             hookVoid(mqtt.getDeclaredMethod("A00", Integer.class, String.class, byte[].class), new XC_MethodHook() {
                 @Override protected void beforeHookedMethod(MethodHookParam param) {
                     if (typing && "/t_st".equals(param.args[1])) {
@@ -117,9 +122,10 @@ final class MessengerPrivacyHooks {
                 }
             });
 
-            Class<?> callback = Class.forName(messenger585 ? "X.Ak3" : "X.9qD", false, loader);
+            String callbackName = messenger586 ? "X.Aid" : messenger585 ? "X.Ak3" : "X.9qD";
+            Class<?> callback = Class.forName(callbackName, false, loader);
             Method completion = callback.getDeclaredMethod("onCompletion", Object.class);
-            if (messenger585) {
+            if (messenger585 || messenger586) {
                 hookVoid(completion, new XC_MethodHook() {
                     @Override protected void beforeHookedMethod(MethodHookParam param) {
                         if (typing) {
@@ -148,6 +154,8 @@ final class MessengerPrivacyHooks {
     private void installStorySeen(ClassLoader loader, MessengerBuild build) {
         try {
             Class<?> card = Class.forName("com.facebook.messaging.montage.model.MontageCard", false, loader);
+            boolean messenger585 = build == MessengerBuild.MESSENGER_585;
+            boolean messenger586 = build == MessengerBuild.MESSENGER_586;
             XC_MethodHook skip = new XC_MethodHook() {
                 @Override protected void beforeHookedMethod(MethodHookParam param) {
                     if (storySeen) {
@@ -156,8 +164,8 @@ final class MessengerPrivacyHooks {
                     }
                 }
             };
-            if (build == MessengerBuild.MESSENGER_585) {
-                Class<?> callback = Class.forName("X.K4W", false, loader);
+            if (messenger585 || messenger586) {
+                Class<?> callback = Class.forName(messenger586 ? "X.PQS" : "X.K4W", false, loader);
                 Field kind = callback.getDeclaredField("$t");
                 Field futureField = callback.getDeclaredField("A03");
                 kind.setAccessible(true);
@@ -165,13 +173,15 @@ final class MessengerPrivacyHooks {
                 hookVoid(callback.getDeclaredMethod("onCompletion", Object.class), new XC_MethodHook() {
                     @Override protected void beforeHookedMethod(MethodHookParam param) throws IllegalAccessException {
                         int action = kind.getInt(param.thisObject);
-                        if (storySeen && (action == 14 || action == 15)
+                        boolean markRead = messenger586 ? action == 1 || action == 2
+                                : action == 14 || action == 15;
+                        if (storySeen && markRead
                                 && cancelAndSkip(param, futureField.get(param.thisObject)))
                             storiesBlocked.incrementAndGet();
                     }
                 });
-                Class<?> handler = Class.forName("X.VIG", false, loader);
-                hookVoid(handler.getDeclaredMethod("DTN", card, boolean.class), skip);
+                Class<?> handler = Class.forName(messenger586 ? "X.PJA" : "X.VIG", false, loader);
+                hookVoid(handler.getDeclaredMethod(messenger586 ? "DZb" : "DTN", card, boolean.class), skip);
             } else {
                 for (String name : new String[]{"X.Nwi", "X.Nwj"}) {
                     Class<?> handler = Class.forName(name, false, loader);
