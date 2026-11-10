@@ -1,8 +1,12 @@
 # Supported host builds
 
-Current hooks target these Facebook for Android `com.facebook.katana` builds:
+FacebookGoodies checks each host app's installed version name and version code, then installs that build's hook bindings. An unlisted build keeps its hooks disabled, and its tab reports **Unsupported**.
 
-| Facebook version | Version code | Minimum Android |
+## Facebook
+
+These hooks target Facebook for Android (`com.facebook.katana`):
+
+| Version | Version code | Minimum Android |
 | --- | ---: | --- |
 | **582.0.0.50.54** | **475417129** | Android 11 |
 | **583.0.0.39.55** | **475614366** | Android 11 |
@@ -10,71 +14,96 @@ Current hooks target these Facebook for Android `com.facebook.katana` builds:
 | **585.0.0.47.54** | **476015694** | Android 11 |
 | **586.0.0.52.53** | **476217123** | Android 11 |
 
-The module checks both the installed version name and version code, then selects that build's hook bindings. Other Facebook builds leave the Facebook hooks disabled.
+## Messenger
 
-The 585 bindings cover the existing Facebook features, including video downloads.
-They were checked against the target APK's DEX declarations and selected method
-bodies. Runtime behavior on 585 has not yet been verified.
+| Version | Version code |
+| --- | ---: |
+| **584.1.0.61.98** | **346817021** |
+| **585.0.0.53.94** | **347015062** |
+| **586.0.0.55.92** | **347215273** |
 
-The Facebook and Messenger 586 bindings retain the existing features and were
-checked against the installed APKs using DEX declarations and selected method
-bodies. Runtime feature behavior on these 586 builds has not yet been verified.
+Each Messenger (`com.facebook.orca`) build uses exact, build-specific bindings. Add Messenger to the module's LSPosed scope separately. Supported Messenger features are hiding the Meta AI floating button, suppressing read receipts, typing status and story views, and the local-read and manual-seen controls.
 
-The Facebook 586 video port uses `05U4`/`03En` for Reels pools and
-`06I0`/`06Hz` for Watch pools. Instream responses use `0RTj`, `0UUH` and
-`0UUA`, retaining their native null-result completion paths and PlayerOrigin
-source/subsource filtering. Reels completion now uses concrete
-`0ReI.A02(0ARi)` and `0ReJ.A02(0ARi)`, invoking each receiver's native
-`A01()` no-ad handler; the 585 inherited callback owner is not reused.
-The metadata node is `04Ae`, restricted by the existing media field/type
-IDs. Launch options use `096o.A01`; banner rendering uses `0RUD.A1E`,
-instream cards use `0TLE.A1E` and `0TLe.A1E` (case-sensitive), and the
-affiliate attachment uses `0dWQ.render`. Empty components use `035j`.
+## Verification status
 
-The retained 586 video verifier passed 42 static declaration/semantic checks.
-Debug APK assembly succeeded; 13 video policy/scoped-options tests were
-executed with no failures. A disposable JVM smoke run exercised the real
-response-filter and metadata callbacks with synthetic host inputs, covering
-unknown/null origins, Reels suborigins, cached-list preservation, disabled
-filtering, launch-time metadata and host exceptions. This is not an
-Android/Xposed installation or playback/UI verification.
+### Facebook 583 and 584
 
-Messenger `com.facebook.orca` **584.1.0.61.98** / version code **346817021**, **585.0.0.53.94** / version code **347015062**, and **586.0.0.55.92** / version code **347215273** are supported for hiding its Meta AI floating button, suppressing read receipts, typing status and story views, and the local-read/manual-seen controls. Each build uses exact, build-specific bindings. Other Messenger builds leave these hooks disabled. Enable Messenger separately in the module's LSPosed scope.
+The 583 and 584 bindings were checked against their matching APKs' DEX. On Facebook 584, News Feed loaded with the module active, and the user confirmed ads were absent and video downloads worked. Threads cards appeared intermittently in Reels on an earlier build and have not been seen on 584, so that fix is not confirmed. Reels-specific behavior on 584 and all feature behavior on 583 still need on-device checks.
 
-Version **1.4.0** separates Facebook and Messenger settings into two tabs. Each tab shows the installed host version and whether that build is supported, followed by its own switches and diagnostics. Messenger diagnostics report loaded hook groups and intercepted read, typing and story signals; counts are actions in the current process, not unique messages or viewers. Existing switch values are retained by an update install.
+Static inspection of Facebook 584.0.0.51.56 / 476015532 found its one-argument Threads response binding. The installed Messenger 585.0.0.53.94 / 347015062 hook targets were matched against its DEX. Neither target has been live-verified with LSPosed.
 
-The Messenger **Hide Meta AI button** switch defaults to on, preserving the previous behavior. Restart Messenger after changing it. Each settings tab also offers a host restart button; it requires root access granted to FacebookGoodies.
+### Facebook 585
 
-The 583 and 584 hook bindings were checked against their matching APKs' DEX. On Facebook 584, News Feed loaded with the module active, and the user confirmed that ads are absent and video downloads work. Threads cards appeared intermittently in Reels on a previous build; they have not been seen yet on 584, so that behavior is not confirmed fixed. Other Reels-specific behavior on 584 and feature behavior on 583 still need on-device verification.
+The 585 bindings cover the existing Facebook features, including video downloads. They were checked against the target APK's DEX declarations and selected method bodies. Runtime behavior on 585 has not been verified.
 
-Static inspection of the installed Facebook build **584.0.0.51.56 / 476015532** found its one-argument Threads response binding; the installed Messenger **585.0.0.53.94 / 347015062** hook targets were matched against its DEX. Neither new target has been live-verified with LSPosed.
+### Facebook and Messenger 586
 
-## Implemented features
+The 586 bindings keep the existing features and were checked against the installed APKs using DEX declarations and selected method bodies. Runtime feature behavior on these builds has not been verified.
 
-- Filters sponsored items in the classic feed insertion path, feed model lists, CSR cache inputs, and News Feed rendering.
-- Filters sponsored selections from the Reels, Watch and VideoHome ad pools. Organic video pools remain unchanged.
-- Completes Reels banner/post-loop ad responses through Facebook's own no-ad handler and hides the dedicated banner component.
-- Sends legacy, modern and extended video ad-break responses through their native empty-result completion paths for recognized Reels, News Feed and Watch player origins. These response hooks leave unknown origins and Story players unchanged.
-- Filters the three verified embedded `InstreamVideoAdBreak` fields on media models, without changing their cached originals or other video fields.
-- Suppresses dedicated non-interruptive/context ad cards and the Reels affiliate attachment, including merchant product cards. Ordinary Reels remain playable.
-- Disables in-content-ad and shopping eligibility and enables banner suppression while Reels launch options are built. Other launch options, host-video data and the native cached-break flag are retained.
-- Hides Facebook suggestion and people-you-may-know categories. Ordinary posts and friends' shares are preserved.
-- Adds independent switches for Threads recommendations in News Feed and between Reels/videos, the top Stories tray, Stories between posts, and Reels cards in News Feed.
-- Adds switches to suppress the in-app Messenger mark-thread-read call and supported screenshot-detection callbacks.
-- Adds Messenger switches for the version-specific read-receipt, typing and story-view paths. They default to on when Messenger is in the LSPosed scope. Suppressed story views may remain unread locally.
-- Keeps Messenger threads visually read on the device while automatic seen is blocked, including the inbox row and the in-chat unread divider. A small dot appears on the chat's emoji icon when a read receipt is pending; hold emoji to send it manually. A short tap still opens emoji. Local read watermarks are stored in Messenger's private preferences under hashed thread keys; message text is not stored.
-- Adds Download immediately above More in the native Reels/video action sidebar, for the current visible video in the `X.58I` player on 582, `X.5B3` on 583, `X.55R` on 584, `X.05gS` on 585, or `X.05iT` on 586. It snapshots that video's sources on tap, selects the largest pixel resolution from its DASH manifest (bandwidth breaks ties), downloads the highest-bandwidth audio track, and muxes encoded samples into MP4 without re-encoding. When no adaptive manifest exists, it uses the player's HD URL, then SD URL.
+The Facebook 586 video port uses `05U4`/`03En` for Reels pools and `06I0`/`06Hz` for Watch pools. Instream responses use `0RTj`, `0UUH` and `0UUA`, which keep their native null-result completion paths and PlayerOrigin source/subsource filtering. Reels completion calls the concrete `0ReI.A02(0ARi)` and `0ReJ.A02(0ARi)` receivers' native `A01()` no-ad handler instead of reusing the 585 callback owner. The metadata node is `04Ae`, limited to the existing media field and type IDs. Launch options use `096o.A01`; banner rendering uses `0RUD.A1E`; instream cards use `0TLE.A1E` and `0TLe.A1E` (case-sensitive); the affiliate attachment uses `0dWQ.render`; empty components use `035j`.
 
-Unknown categories and unsupported model shapes remain visible. Counts in the settings screen are interception actions, not unique posts.
+Checks on this port:
 
-The optional content filters default to off. In News Feed, the Threads filter uses the `PROMOTION` category used by the reference mod, so other units in that category may also be hidden. In Reels/videos, it removes only the typed `THREADS_MIDCARD` promotion from incoming lists before a page is created; unknown or unreadable items remain visible. The Reels filter removes `FB_SHORTS` and `FB_SHORTS_FALLBACK` feed cards without hiding the Reels tab. The middle Stories filter removes `MULTI_FB_STORIES_TRAY` feed units and the inline Stories viewer. The top Stories filter separately skips both top-tray adapter builders and requires a Facebook restart when changed.
+- 42 static declaration and semantic checks passed.
+- The debug APK assembled, and 13 video policy and scoped-option tests passed.
+- A disposable JVM smoke run drove the real response-filter and metadata callbacks with synthetic host input: unknown and null origins, Reels suborigins, cached-list preservation, disabled filtering, launch-time metadata and host exceptions.
 
-Read-receipt suppression can leave a chat locally unread. It is scoped to Facebook's in-app Messenger pipeline, and its recipient-side effect has not been tested with a second account. Screenshot-detection suppression covers its registered callbacks and the identified observer; it does not suppress every screen-recording API, bypass DRM, or force protected content to allow screenshots.
+None of this is an Android or Xposed installation check. Playback and UI behavior remain unverified.
 
-Download metadata is held only for the active visible player and cleared on player disappearance, activity pause/destruction, or disabling the control. An explicit download owns its immutable source snapshot until it finishes or is cancelled. There is no app-wide capture, persistent URL/ID cache, browser downloader, cookie export, or external resolver. Temporary media files are removed after a job, and interrupted-job files are cleaned before the next download. Only numeric download counters are reported.
+## Facebook features
 
-The progress dialog keeps source-finding, transfer, merge, save and cleanup stages visible. Separate video and audio files download in parallel. Transfer rows show elapsed time, size and speed; percentages appear only when the full transfer size is known. Signed source URLs are never displayed.
+### Feed and ads
 
-Downloads support static single-period MP4 DASH with complete `SegmentBase` URLs, `SegmentList`, and finite `SegmentTimeline` templates using unformatted Number/Time placeholders. VP9 video in MP4 uses a lossless container merge when Android's native MP4 writer rejects that codec; the video resolution and encoded audio/video samples are preserved. Its parser mapping is bundled with the module for LSPosed class loading. Live, protected, WebM/HLS, multi-period and other unsupported manifest forms fail with a message; a supported lower resolution is not silently substituted for an unsupported highest source. Signed media URLs can expire: play the video again and retry. Downloads run in Facebook's process and can be interrupted if Android kills it. Android 11+ uses pending MediaStore entries. Native device checks and actual Facebook feed/Reels download acceptance are tracked separately in the local analysis report.
+- Filters sponsored items in the classic feed insertion path, feed model lists, CSR cache inputs and News Feed rendering.
+- Filters sponsored selections from the Reels, Watch and VideoHome ad pools. Organic video pools are unchanged.
+- Completes Reels banner and post-loop ad responses through Facebook's own no-ad handler, and hides the dedicated banner component.
+- Sends legacy, modern and extended video ad-break responses through their native empty-result completion paths for recognized Reels, News Feed and Watch player origins. Unknown origins and Story players are left unchanged.
+- Filters the three verified embedded `InstreamVideoAdBreak` fields on media models without changing their cached originals or other video fields.
+- Suppresses dedicated non-interruptive and context ad cards and the Reels affiliate attachment, including merchant product cards. Ordinary Reels stay playable.
+- Disables in-content-ad and shopping eligibility and enables banner suppression while Reels launch options are built. Other launch options, host-video data and the native cached-break flag are kept.
 
-Ads inside the Stories viewer, Marketplace and games, other suggested-content categories, Messenger inbox ads, repost actions, account import/export, remote configuration, donations, and updates are outside the implemented feature set. A second account confirmed that automatic Messenger seen stayed hidden in the tested chat, and holding emoji sent seen in the tested chat. Typing, story views, encrypted chats and notification-read paths still need separate recipient-side checks.
+Unknown categories and unsupported model shapes stay visible. Counts in the settings screen are interception actions, not unique posts.
+
+### Content filters
+
+The optional content filters default to off.
+
+- **Hide Threads** uses the `PROMOTION` category that the reference mod uses in News Feed, so other units in that category may also be hidden. In Reels and videos it removes only the typed `THREADS_MIDCARD` promotion from incoming lists before a page is created; unknown or unreadable items stay visible.
+- **Hide Reels** removes `FB_SHORTS` and `FB_SHORTS_FALLBACK` feed cards without hiding the Reels tab.
+- **Hide Stories in the middle** removes `MULTI_FB_STORIES_TRAY` feed units and the inline Stories viewer.
+- **Hide Stories at the top** skips both top-tray adapter builders and needs a Facebook restart when changed.
+
+### Privacy
+
+Read-receipt suppression can leave a chat locally unread. It is scoped to Facebook's in-app Messenger pipeline, and its recipient-side effect has not been tested with a second account. Screenshot-detection suppression covers the registered callbacks and the identified observer; it does not suppress every screen-recording API, bypass DRM, or force protected content to allow screenshots.
+
+### Video color range
+
+Facebook ships `skipSetDataSpaceForSDR = true`, so its renderer never calls `ANativeWindow_setBuffersDataSpace` for SDR and the 8-bit YV12 buffer keeps a full-range sRGB tag. Hardware overlays then expand 16-235 to 0-255 and the video looks washed out until a GPU-composited overlay forces the limited-to-full conversion shader.
+
+**True video color range** clears that flag on the `exoplayer2.av1.src.Dav1dMediaCodecAdapterSetting` constructor, so Dav1d declares its SDR output as limited range. It covers every supported Facebook build, is off by default, and needs the video reopened after a change. Diagnostics counts each patched codec setting.
+
+## Messenger features
+
+- The read-receipt, typing and story-view switches cover the version-specific paths and default to on when Messenger is in the LSPosed scope. Suppressed story views may stay unread locally.
+- Threads stay visually read on the device while automatic seen is blocked, including the inbox row and the in-chat unread divider. A small dot appears on the chat's emoji icon while a read receipt is pending; hold emoji to send it, and a short tap still opens emoji.
+- Local read watermarks live in Messenger's private preferences under hashed thread keys. Message text is not stored.
+- Updating the module keeps existing switch values.
+- Diagnostics report loaded hook groups and intercepted read, typing and story signals. Counts are actions in the current process, not unique messages or viewers.
+
+## Downloads
+
+- **Download** sits above **More** in the native Reels and video action sidebar for the visible video in the `X.58I` player on 582, `X.5B3` on 583, `X.55R` on 584, `X.05gS` on 585 and `X.05iT` on 586.
+- A tap snapshots that video's sources, takes the largest pixel resolution from its DASH manifest (bandwidth breaks ties), downloads the highest-bandwidth audio track and muxes the encoded samples into MP4 without re-encoding. Without an adaptive manifest it uses the player's HD URL, then the SD URL.
+- The progress dialog keeps source-finding, transfer, merge, save and cleanup visible. Video and audio download in parallel, and each transfer row shows elapsed time, size and speed; a percentage appears only when the full transfer size is known. Signed source URLs are never displayed.
+- Supported input is static single-period MP4 DASH with complete `SegmentBase` URLs, `SegmentList`, and finite `SegmentTimeline` templates using unformatted Number/Time placeholders. VP9 video in MP4 uses a lossless container merge when Android's native MP4 writer rejects the codec, so resolution and encoded samples are preserved. That parser mapping is bundled with the module for LSPosed class loading.
+- Live, protected, WebM/HLS, multi-period and other unsupported manifest forms fail with a message. A lower resolution is never substituted for an unsupported highest source.
+- Download metadata exists only for the active visible player. It is cleared when the player disappears, the activity pauses or is destroyed, or the control is disabled. A running download owns its immutable source snapshot until it finishes or is cancelled. There is no app-wide capture, persistent URL or ID cache, browser downloader, cookie export, or external resolver. Temporary files are removed after a job, and an interrupted job is cleaned up before the next download. Only numeric counters are reported.
+- Signed media URLs can expire: play the video again and retry. Downloads run in Facebook's process, so Android can kill one mid-transfer.
+- Android 11 and newer publish the file through MediaStore, so the module needs no storage permission. Older releases write the file directly and need Facebook's storage permission.
+
+## Outside the feature set
+
+Ads in the Stories viewer, Marketplace and games, other suggested-content categories, Messenger inbox ads, repost actions, account import/export, remote configuration, donations and updates are not handled.
+
+A second account confirmed that automatic Messenger seen stayed hidden in the tested chat and that holding emoji sent seen there. Typing, story views, encrypted chats and notification-read paths still need their own recipient-side checks.
