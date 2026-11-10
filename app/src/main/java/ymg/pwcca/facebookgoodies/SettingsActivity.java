@@ -232,6 +232,8 @@ public final class SettingsActivity extends Activity {
             addDivider(chats);
             addSetting(page, chats, "messenger_local_read", R.string.messenger_local_read, R.string.messenger_local_read_description, true);
             addDivider(chats);
+            addSetting(page, chats, "messenger_markers", R.string.messenger_markers, R.string.messenger_markers_description, true);
+            addDivider(chats);
             addSetting(page, chats, "messenger_typing", R.string.messenger_typing, R.string.messenger_typing_description, true);
             addDivider(chats);
             addSetting(page, chats, "messenger_hide_ai", R.string.messenger_hide_ai,

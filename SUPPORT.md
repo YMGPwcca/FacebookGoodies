@@ -88,6 +88,8 @@ Facebook ships `skipSetDataSpaceForSDR = true`, so its renderer never calls `ANa
 - The read-receipt, typing and story-view switches cover the version-specific paths and default to on when Messenger is in the LSPosed scope. Suppressed story views may stay unread locally.
 - Threads stay visually read on the device while automatic seen is blocked, including the inbox row and the in-chat unread divider. A small dot appears on the chat's emoji icon while a read receipt is pending; hold emoji to send it, and a short tap still opens emoji.
 - Local read watermarks live in Messenger's private preferences under hashed thread keys. Message text is not stored.
+- **Mark chats read locally** changes the local chat-list state on its own and does not send a receipt. It defaults to on, which keeps the previous behavior; turn it off to let a chat stay visibly unread while receipts are blocked.
+- **Show message status icons** draws a crossed-out eye beside incoming messages newer than the last confirmed receipt and an unsend icon beside observed incoming tombstones. It is independent of the other switches and defaults to on. On 585 and 586 the eye follows the host's live synchronized read watermark, so it clears when the other side reads. On 584 the baseline comes from receipts this module blocked or sent manually, so an eye can stay until a receipt is sent.
 - Updating the module keeps existing switch values.
 - Diagnostics report loaded hook groups and intercepted read, typing and story signals. Counts are actions in the current process, not unique messages or viewers.
 

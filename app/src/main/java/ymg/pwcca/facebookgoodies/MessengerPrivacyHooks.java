@@ -14,6 +14,7 @@ import de.robv.android.xposed.XposedBridge;
 final class MessengerPrivacyHooks {
     private volatile boolean seen;
     private volatile boolean localRead;
+    private volatile boolean markers;
     private volatile boolean typing;
     private volatile boolean storySeen;
     private final AtomicInteger installedHooks = new AtomicInteger();
@@ -23,18 +24,22 @@ final class MessengerPrivacyHooks {
     private final AtomicInteger errors = new AtomicInteger();
     private boolean aiFabInstalled;
     private MessengerReadControls readControls;
+    private MessengerMessageBorders messageBorders;
 
     static void install(Context app, ClassLoader loader, boolean aiFabInstalled, MessengerBuild build) {
         MessengerPrivacyHooks hooks = new MessengerPrivacyHooks();
         hooks.aiFabInstalled = aiFabInstalled;
         hooks.refresh(app);
         XposedBridge.log("FacebookGoodies: Messenger privacy enabled seen=" + hooks.seen
-                + " localRead=" + hooks.localRead
+                + " localRead=" + hooks.localRead + " markers=" + hooks.markers
                 + " typing=" + hooks.typing + " story=" + hooks.storySeen);
         hooks.installSeen(loader, build);
         hooks.readControls = new MessengerReadControls(app, loader,
-                () -> hooks.seen, () -> hooks.localRead, build);
+                () -> hooks.seen, () -> hooks.localRead, () -> hooks.markers, build);
         hooks.readControls.install();
+        hooks.messageBorders = new MessengerMessageBorders(app, loader, hooks.readControls,
+                () -> hooks.markers, build);
+        hooks.messageBorders.install();
         hooks.installTyping(loader, build);
         hooks.installStorySeen(loader, build);
         hooks.report(app);
@@ -52,12 +57,14 @@ final class MessengerPrivacyHooks {
         Bundle status = new Bundle();
         status.putBoolean("supported", true);
         status.putInt("hooks", installedHooks.get() + (aiFabInstalled ? 1 : 0)
-                + (readControls == null ? 0 : readControls.installedGroups()));
+                + (readControls == null ? 0 : readControls.installedGroups())
+                + (messageBorders == null ? 0 : messageBorders.installedHooks()));
         status.putInt("aiFab", aiFabInstalled ? 1 : 0);
         status.putInt("reads", readsBlocked.get() + (readControls == null ? 0 : readControls.blockedCount()));
         status.putInt("typing", typingBlocked.get());
         status.putInt("stories", storiesBlocked.get());
-        status.putInt("errors", errors.get() + (readControls == null ? 0 : readControls.errorCount()));
+        status.putInt("errors", errors.get() + (readControls == null ? 0 : readControls.errorCount())
+                + (messageBorders == null ? 0 : messageBorders.errorCount()));
         try { app.getContentResolver().call(SettingsProvider.URI, "report", null, status); }
         catch (RuntimeException ignored) { }
     }
@@ -67,12 +74,14 @@ final class MessengerPrivacyHooks {
             Bundle config = app.getContentResolver().call(SettingsProvider.URI, "config", null, null);
             seen = config != null && config.getBoolean("messenger_seen");
             localRead = config != null && config.getBoolean("messenger_local_read");
+            markers = config != null && config.getBoolean("messenger_markers");
             typing = config != null && config.getBoolean("messenger_typing");
             storySeen = config != null && config.getBoolean("messenger_story_seen");
         } catch (RuntimeException failure) {
-            seen = localRead = typing = storySeen = false;
+            seen = localRead = markers = typing = storySeen = false;
         }
         if (readControls != null) readControls.updateButtonVisibility();
+        if (messageBorders != null) messageBorders.refresh();
     }
 
     private void installSeen(ClassLoader loader, MessengerBuild build) {

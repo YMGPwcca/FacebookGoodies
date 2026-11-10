@@ -40,7 +40,9 @@ The module checks the installed version name and version code against that list.
 
 ## Messenger
 
-- **Hide read receipts** keeps chats read on this device while automatic seen is suppressed. A dot on the emoji button marks a pending receipt, and holding the emoji button sends seen.
+- **Hide read receipts** stops Messenger from sending read receipts. A dot on the emoji button marks a pending receipt, and holding the emoji button sends seen.
+- **Mark chats read locally** keeps the chat list read on this device without sending a receipt. It is on by default.
+- **Show message status icons** marks incoming messages that still wait for a read receipt, and incoming messages the sender unsent. It is on by default.
 - **Hide typing status** stops Messenger from sending typing activity.
 - **Hide story views** stops Messenger from marking stories seen. Stories may stay unread.
 - **Hide Meta AI button** removes the floating Meta AI button. It is on by default; restart Messenger after changing it.

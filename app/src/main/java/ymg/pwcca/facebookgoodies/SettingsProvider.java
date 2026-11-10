@@ -43,7 +43,7 @@ public final class SettingsProvider extends ContentProvider {
         out.putBoolean("downloads", prefs.getBoolean("downloads", true));
         out.putBoolean("video_range", prefs.getBoolean("video_range", false));
         for (String key : new String[]{"messenger_seen", "messenger_local_read",
-                "messenger_typing", "messenger_story_seen", "messenger_hide_ai"})
+                "messenger_markers", "messenger_typing", "messenger_story_seen", "messenger_hide_ai"})
             out.putBoolean(key, prefs.getBoolean(key, true));
         for (String key : new String[]{"hide_threads", "hide_stories_top", "hide_stories_middle", "hide_reels"})
             out.putBoolean(key, prefs.getBoolean(key, false));
