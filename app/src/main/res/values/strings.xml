@@ -60,6 +60,10 @@
     <string name="download_current_video_description">Add Download above More in the player sidebar.</string>
     <string name="diagnostic_download_hooks">Download hooks loaded</string>
     <string name="diagnostic_downloads">Videos saved</string>
+    <string name="section_video">Video</string>
+    <string name="video_range">True video color range</string>
+    <string name="video_range_description">Tag 8-bit SDR video as limited range instead of full range so hardware overlays stop washing it out. Reopen the video after changing.</string>
+    <string name="diagnostic_video_range">Video range patches</string>
     <string name="diagnostic_download_failures">Downloads cancelled or failed</string>
     <string name="hide_threads">Hide Threads</string>
     <string name="hide_threads_description">Remove Threads recommendations from the feed and between videos.</string>

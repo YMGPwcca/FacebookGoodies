@@ -43,6 +43,7 @@ final class HostState {
     final AtomicInteger affiliateCards = new AtomicInteger();
     final AtomicInteger videoMetadata = new AtomicInteger();
     final AtomicInteger videoCards = new AtomicInteger();
+    final AtomicInteger videoRange = new AtomicInteger();
     final AtomicInteger contentHooks = new AtomicInteger();
     final AtomicInteger threads = new AtomicInteger();
     final AtomicInteger threadsVideo = new AtomicInteger();
@@ -85,6 +86,7 @@ final class HostState {
         out.putInt("videoSourceCode", videoSourceCode.get());
         out.putInt("reelsLaunchFlags", reelsLaunchFlags.get()); out.putInt("affiliateCards", affiliateCards.get());
         out.putInt("videoMetadata", videoMetadata.get()); out.putInt("videoCards", videoCards.get());
+        out.putInt("videoRange", videoRange.get());
         out.putInt("contentHooks", contentHooks.get()); out.putInt("threads", threads.get());
         out.putInt("threadsVideo", threadsVideo.get());
         out.putInt("storiesTop", storiesTop.get()); out.putInt("storiesMiddle", storiesMiddle.get()); out.putInt("reels", reels.get());

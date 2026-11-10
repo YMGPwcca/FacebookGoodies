@@ -224,6 +224,8 @@ public final class SettingsActivity extends Activity {
             addSetting(page, privacy, "capture", R.string.block_capture_detection, R.string.block_capture_detection_description, true);
             LinearLayout downloads = addGroup(page, R.string.section_downloads);
             addSetting(page, downloads, "downloads", R.string.download_current_video, R.string.download_current_video_description, true);
+            LinearLayout video = addGroup(page, R.string.section_video);
+            addSetting(page, video, "video_range", R.string.video_range, R.string.video_range_description, false);
         } else {
             LinearLayout chats = addGroup(page, R.string.section_chats);
             addSetting(page, chats, "messenger_seen", R.string.messenger_seen, R.string.messenger_seen_description, true);
@@ -422,6 +424,7 @@ public final class SettingsActivity extends Activity {
             addCounter(page, "downloadHooks", R.string.diagnostic_download_hooks);
             addCounter(page, "downloads", R.string.diagnostic_downloads);
             addCounter(page, "downloadFailures", R.string.diagnostic_download_failures);
+            addCounter(page, "videoRange", R.string.diagnostic_video_range);
         } else {
             addCounter(page, "hooks", R.string.diagnostic_hooks);
             addCounter(page, "reads", R.string.diagnostic_messenger_reads);

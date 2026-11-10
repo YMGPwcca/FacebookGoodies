@@ -52,6 +52,7 @@ public final class FacebookModule implements IXposedHookLoadPackage {
         else if (build == FacebookBuild.FACEBOOK_586) install586(app, loader, state, build);
         else install584(app, loader, state, build);
         try { PrivacyHooks.install(loader, state); } catch (RuntimeException | LinkageError failure) { state.failure("privacy-install"); }
+        try { VideoColorRangeHooks.install(loader, state); } catch (RuntimeException | LinkageError failure) { state.failure("video-range-install"); }
         state.start(app);
         XposedBridge.log("FacebookGoodies: initialized hooks=" + state.hooks.get());
     }
