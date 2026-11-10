@@ -1,41 +1,55 @@
 # FacebookGoodies
 
-An LSPosed module for Facebook feed controls and Messenger privacy controls.
-
-## Features
-
-- Hide sponsored posts and videos in News Feed, Reels and Video feeds.
-- Suppress supported video ad breaks and Reels banners.
-- Hide affiliate product cards over Reels.
-- Hide suggested posts and People You May Know.
-- Hide Threads recommendations in News Feed and between Reels/videos.
-- Hide Reels cards in News Feed.
-- Hide Stories at the top or between posts, with separate switches.
-- Hide read receipts in Facebook chats.
-- Hide the Meta AI floating button in Messenger with a separate switch.
-- Suppress Messenger read receipts, typing status and story views on the supported build.
-- Keep Messenger chats locally read while automatic seen is suppressed; a small dot on emoji marks a pending receipt, and holding emoji sends seen manually.
-- Block supported screenshot-detection signals.
-- Download the current video at the highest available resolution, with audio.
-
-Friends’ shares stay visible. Facebook chat read-receipt filtering can leave chats unread. Suppressed Messenger story views can stay unread locally.
-
-The content filters are off by default. Restart Facebook after changing the top Stories setting; refresh the feed for the other filters.
-
-Each settings tab also has a restart button for its host app. Restarting this way requires root access. Restart Messenger after changing the Meta AI switch; it defaults to on to preserve the previous behavior.
-
-While a video is playing, tap Download above More in the player's action sidebar. Videos save to `Downloads/FacebookGoodies`. Only the current video is selected; there is no video history. The progress dialog shows source finding, video and audio transfers, merging and saving, with elapsed time and transfer speed. Downloads can be cancelled from the dialog.
+An LSPosed module with feed filters, video downloads and privacy switches for the Facebook Android app, plus privacy switches for Messenger.
 
 ## Requirements
 
-Android 11 or newer and LSPosed. Facebook features require Facebook **582.0.0.50.54**, **583.0.0.39.55**, **584.0.0.51.56**, **585.0.0.47.54**, or **586.0.0.52.53**; Messenger features require Messenger **584.1.0.61.98**, **585.0.0.53.94**, or **586.0.0.55.92**. Both check their [matching build codes](SUPPORT.md).
+- Android 11 or newer
+- LSPosed
+- A supported Facebook or Messenger build, listed in [Supported host builds](SUPPORT.md)
+
+The module checks the installed version name and version code against that list. An unlisted build runs with its hooks disabled, and its tab reports **Unsupported**.
 
 ## Setup
 
 1. Install the FacebookGoodies APK.
-2. Enable it in LSPosed and select **Facebook** and/or **Messenger** as its scope.
-3. Restart each selected app.
-4. Open FacebookGoodies and use the Facebook or Messenger tab for that app's controls and diagnostics.
+2. In LSPosed, enable FacebookGoodies and add Facebook, Messenger, or both to its scope.
+3. Restart each app you added.
+4. Open FacebookGoodies and use the Facebook or Messenger tab for that app's switches and diagnostics.
+
+## Facebook
+
+### Feed
+
+- **Hide ads** filters sponsored posts and videos from News Feed, Reels and video feeds, including supported in-video ad breaks, Reels banners and affiliate product cards.
+- **Hide suggested posts** removes suggested posts and People You May Know. Friends' shares stay visible.
+- **Feed content** switches remove Threads recommendations, Reels cards, the Stories tray and Stories cards between posts. All four are off by default.
+
+### Privacy
+
+- **Hide read receipts** stops chats inside Facebook from sending read receipts. Chats may stay unread.
+- **Block screenshot detection** blocks the supported screenshot-detection signals.
+
+### Downloads
+
+- **Download current video** adds **Download** above **More** in the player's action sidebar. The video and its audio are saved as one MP4 in `Downloads/FacebookGoodies`. Only the video on screen is offered; the progress dialog shows finding, transfer, merging and saving, and can cancel the download.
+
+### Video
+
+- **True video color range** tags 8-bit SDR video as limited range so hardware overlays stop washing the picture out. It is off by default. Reopen the video after changing it.
+
+## Messenger
+
+- **Hide read receipts** keeps chats read on this device while automatic seen is suppressed. A dot on the emoji button marks a pending receipt, and holding the emoji button sends seen.
+- **Hide typing status** stops Messenger from sending typing activity.
+- **Hide story views** stops Messenger from marking stories seen. Stories may stay unread.
+- **Hide Meta AI button** removes the floating Meta AI button. It is on by default; restart Messenger after changing it.
+
+## Settings behavior
+
+- Feed filters apply after a feed refresh. The top Stories switch needs a Facebook restart.
+- Each tab has a restart button for its host app. Restarting from the module requires root access.
+- Diagnostics counts actions in the current app process, so the numbers reset when that app restarts and do not count unique posts or messages.
 
 ## Build
 
@@ -43,7 +57,7 @@ Android 11 or newer and LSPosed. Facebook features require Facebook **582.0.0.50
 ./gradlew :app:assembleDebug
 ```
 
-The APK is saved to `app/build/outputs/apk/debug/app-debug.apk`. See [BUILDING.md](BUILDING.md) for requirements and Windows instructions.
+The APK is written to `app/build/outputs/apk/debug/app-debug.apk`. See [Build instructions](BUILDING.md) for requirements, Windows commands and the local tests.
 
 ## License
 
