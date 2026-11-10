@@ -13,6 +13,7 @@ import de.robv.android.xposed.XposedBridge;
 
 final class MessengerPrivacyHooks {
     private volatile boolean seen;
+    private volatile boolean localRead;
     private volatile boolean typing;
     private volatile boolean storySeen;
     private final AtomicInteger installedHooks = new AtomicInteger();
@@ -28,9 +29,11 @@ final class MessengerPrivacyHooks {
         hooks.aiFabInstalled = aiFabInstalled;
         hooks.refresh(app);
         XposedBridge.log("FacebookGoodies: Messenger privacy enabled seen=" + hooks.seen
+                + " localRead=" + hooks.localRead
                 + " typing=" + hooks.typing + " story=" + hooks.storySeen);
         hooks.installSeen(loader, build);
-        hooks.readControls = new MessengerReadControls(app, loader, () -> hooks.seen, build);
+        hooks.readControls = new MessengerReadControls(app, loader,
+                () -> hooks.seen, () -> hooks.localRead, build);
         hooks.readControls.install();
         hooks.installTyping(loader, build);
         hooks.installStorySeen(loader, build);
@@ -63,10 +66,11 @@ final class MessengerPrivacyHooks {
         try {
             Bundle config = app.getContentResolver().call(SettingsProvider.URI, "config", null, null);
             seen = config != null && config.getBoolean("messenger_seen");
+            localRead = config != null && config.getBoolean("messenger_local_read");
             typing = config != null && config.getBoolean("messenger_typing");
             storySeen = config != null && config.getBoolean("messenger_story_seen");
         } catch (RuntimeException failure) {
-            seen = typing = storySeen = false;
+            seen = localRead = typing = storySeen = false;
         }
         if (readControls != null) readControls.updateButtonVisibility();
     }

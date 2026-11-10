@@ -38,6 +38,7 @@ final class MessengerReadControls {
     private final Context app;
     private final ClassLoader loader;
     private final BooleanSupplier enabled;
+    private final BooleanSupplier localReadEnabled;
     private final MessengerBuild build;
     private final SharedPreferences localReads;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -67,10 +68,12 @@ final class MessengerReadControls {
     private Field summaryReadTime;
     private Field summaryLastMessage;
 
-    MessengerReadControls(Context app, ClassLoader loader, BooleanSupplier enabled, MessengerBuild build) {
+    MessengerReadControls(Context app, ClassLoader loader, BooleanSupplier enabled,
+                          BooleanSupplier localReadEnabled, MessengerBuild build) {
         this.app = app;
         this.loader = loader;
         this.enabled = enabled;
+        this.localReadEnabled = localReadEnabled;
         this.build = build;
         this.localReads = app.getSharedPreferences("facebookgoodies_local_reads", Context.MODE_PRIVATE);
     }
@@ -112,7 +115,7 @@ final class MessengerReadControls {
         summaryLastMessage.setAccessible(true);
         XposedBridge.hookAllConstructors(summary, new XC_MethodHook() {
             @Override protected void afterHookedMethod(MethodHookParam param) {
-                if (!enabled.getAsBoolean()) return;
+                if (!enabled.getAsBoolean() && !localReadEnabled.getAsBoolean()) return;
                 try {
                     Object key = summaryThread.get(param.thisObject);
                     if (key != null) {
@@ -437,6 +440,7 @@ final class MessengerReadControls {
     }
 
     private void applyLocalRead(Object summary) {
+        if (!localReadEnabled.getAsBoolean()) return;
         try {
             Object key = summaryThread.get(summary);
             if (key == null) return;
@@ -448,6 +452,7 @@ final class MessengerReadControls {
     }
 
     private void rememberLocalRead(String key, Long readTime) {
+        if (!localReadEnabled.getAsBoolean()) return;
         long now = System.currentTimeMillis();
         long time = readTime != null && readTime > 0 ? Math.min(readTime, now) : now;
         String pref = prefKey(key);

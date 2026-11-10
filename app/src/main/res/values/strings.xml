@@ -48,6 +48,8 @@
     <string name="section_stories">Stories</string>
     <string name="messenger_seen">Hide read receipts</string>
     <string name="messenger_seen_description">Keep chats read on this device. Hold emoji in the chat to send seen.</string>
+    <string name="messenger_local_read">Mark chats read locally</string>
+    <string name="messenger_local_read_description">Update the chat list without sending a read receipt. Restart Messenger after changing.</string>
     <string name="messenger_typing">Hide typing status</string>
     <string name="messenger_typing_description">Prevent Messenger from sending typing activity.</string>
     <string name="messenger_story_seen">Hide story views</string>

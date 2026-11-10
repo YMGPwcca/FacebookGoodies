@@ -230,6 +230,8 @@ public final class SettingsActivity extends Activity {
             LinearLayout chats = addGroup(page, R.string.section_chats);
             addSetting(page, chats, "messenger_seen", R.string.messenger_seen, R.string.messenger_seen_description, true);
             addDivider(chats);
+            addSetting(page, chats, "messenger_local_read", R.string.messenger_local_read, R.string.messenger_local_read_description, true);
+            addDivider(chats);
             addSetting(page, chats, "messenger_typing", R.string.messenger_typing, R.string.messenger_typing_description, true);
             addDivider(chats);
             addSetting(page, chats, "messenger_hide_ai", R.string.messenger_hide_ai,
