@@ -143,14 +143,11 @@ final class MessengerHostBindings {
                 break;
             case "X.ASA": if ("AMG".equals(name)) return "AMv"; break;
             case "X.BK9": if ("AY8".equals(name)) return "AYt"; break;
+            case "X.2fX": if ("CQ1".equals(name)) return "CPv"; break;
             case "X.PVi": if ("DTN".equals(name)) return "DZI"; break;
             case "X.BTr":
                 if ("A0U".equals(name)) return "A0V";
                 if ("A0T".equals(name)) return "A0U";
-                break;
-            case "com.facebook.litho.ComponentHost":
-                if ("A0T".equals(name)) return "A0S";
-                if ("A0U".equals(name)) return "A0T";
                 break;
         }
         return name;

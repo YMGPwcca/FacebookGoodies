@@ -223,7 +223,7 @@ final class MessengerMessageBorders {
         final Field operationArgs = operationDispatch ? field(sectionOperation, "A03") : null;
         final Method rowOperation;
         if (operationDispatch) {
-            rowOperation = rowItem.getDeclaredMethod("CQ1");
+            rowOperation = MessengerHostBindings.method(build, rowItem, "CQ1");
             rowOperation.setAccessible(true);
         } else rowOperation = null;
         XC_MethodHook rowHook = new XC_MethodHook() {
