@@ -85,6 +85,10 @@ final class MessengerHostBindings {
         REBUILD_586.put("X.1IG", "X.1Gk");
     }
 
+    static java.util.Set<String> baseNames() { return java.util.Collections.unmodifiableSet(RELEASE_586.keySet()); }
+
+    static java.util.Set<String> rebuildBaseNames() { return java.util.Collections.unmodifiableSet(REBUILD_586.keySet()); }
+
     static String typeName(MessengerBuild build, String baseName) throws ClassNotFoundException {
         if (!baseName.startsWith("X.")) return baseName;
         Map<String, String> table = build == MessengerBuild.MESSENGER_586 ? RELEASE_586
