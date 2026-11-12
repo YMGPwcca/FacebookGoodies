@@ -92,7 +92,7 @@ final class MessengerMessageBorders {
     int errorCount() { return errors.get(); }
 
     void install() {
-        if (build == MessengerBuild.MESSENGER_585 || build == MessengerBuild.MESSENGER_586) {
+        if (build == MessengerBuild.MESSENGER_585 || build.is586()) {
             try { installEncryptedRows585(); }
             catch (ReflectiveOperationException | RuntimeException | LinkageError failure) { logFailure("585 encrypted rows", failure); }
             try { installRowModel585(); }
@@ -177,7 +177,7 @@ final class MessengerMessageBorders {
             @Override protected void beforeHookedMethod(MethodHookParam param) {
                 try {
                     Object view = cleanupView.get(param.thisObject);
-                    if (cleanupKind.getInt(param.thisObject) == (build == MessengerBuild.MESSENGER_586 ? 123 : 97)
+                    if (cleanupKind.getInt(param.thisObject) == (build.is586() ? 123 : 97)
                             && view instanceof View) unbind((View) view);
                 } catch (ReflectiveOperationException | RuntimeException failure) {
                     logFailure("585 encrypted row cleanup", failure);
@@ -218,7 +218,7 @@ final class MessengerMessageBorders {
         AtomicInteger rowEventLogs = new AtomicInteger();
         // 586 builds rows from the Litho event payload inside the row item's constructor;
         // the 585 section dispatch method is not invoked directly on this build.
-        boolean operationDispatch = build == MessengerBuild.MESSENGER_586;
+        boolean operationDispatch = build.is586();
         Class<?> rowItem = operationDispatch ? hostType("X.2Qp") : null;
         final Field operationArgs = operationDispatch ? field(sectionOperation, "A03") : null;
         final Method rowOperation;
@@ -399,7 +399,7 @@ final class MessengerMessageBorders {
         Field nodeData = field(renderNode, "A08");
         // 586 moved the Litho component off A03 (now the scoped-mount SparseArray) onto A04.
         Field renderComponent = field(lithoRenderUnit,
-                build == MessengerBuild.MESSENGER_586 ? "A04" : "A03");
+                build.is586() ? "A04" : "A03");
         AtomicInteger mountCallbacks = new AtomicInteger();
         AtomicInteger unmatchedMountLogs = new AtomicInteger();
         AtomicInteger mappedMountLogs = new AtomicInteger();

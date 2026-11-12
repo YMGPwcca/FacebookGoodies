@@ -154,7 +154,7 @@ final class MessengerReadControls {
         catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
             logFailure("thread converter", failure);
         }
-        if (build == MessengerBuild.MESSENGER_585 || build == MessengerBuild.MESSENGER_586) {
+        if (build == MessengerBuild.MESSENGER_585 || build.is586()) {
             try { installLiveRead585(); }
             catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
                 logFailure("live read hook", failure);
@@ -178,7 +178,7 @@ final class MessengerReadControls {
                         String thread = key.toString();
                         liveSummaries.put(thread, new WeakReference<>(param.thisObject));
                         observeInitialRead(thread, summaryReadTime.getLong(param.thisObject));
-                        if ((build == MessengerBuild.MESSENGER_585 || build == MessengerBuild.MESSENGER_586)
+                        if ((build == MessengerBuild.MESSENGER_585 || build.is586())
                                 && thread.startsWith("ADVANCED_CRYPTO_"))
                             observeSyncedRead(thread, summaryReadTime.getLong(param.thisObject), false);
                         long lastMessage = summaryLastMessage.getLong(param.thisObject);
@@ -195,9 +195,8 @@ final class MessengerReadControls {
 
     private void installThreadConverter() throws ReflectiveOperationException {
         Class<?> threadKey = Class.forName("com.facebook.messaging.model.threadkey.ThreadKey", false, loader);
-        Class<?> converter = Class.forName(
-                build == MessengerBuild.MESSENGER_586 ? "X.4mE"
-                        : build == MessengerBuild.MESSENGER_585 ? "X.4lW" : "X.7gJ", false, loader);
+        Class<?> converter = Class.forName(build == MessengerBuild.MESSENGER_584_1
+                ? "X.7gJ" : MessengerHostBindings.typeName(build, "X.4lW"), false, loader);
         Method convert = converter.getDeclaredMethod(
                 build == MessengerBuild.MESSENGER_584_1 ? "A01" : "A02", threadKey);
         threadConverter = convert;
@@ -214,7 +213,7 @@ final class MessengerReadControls {
     }
 
     private void installLiveRead585() throws ReflectiveOperationException {
-        Class<?> stream = Class.forName(build == MessengerBuild.MESSENGER_586 ? "X.517" : "X.50R", false, loader);
+        Class<?> stream = Class.forName(MessengerHostBindings.typeName(build, "X.50R"), false, loader);
         Field streamThread = stream.getDeclaredField("A03");
         Field streamLatest = stream.getDeclaredField("A02");
         streamThread.setAccessible(true);
@@ -239,9 +238,8 @@ final class MessengerReadControls {
     }
 
     private void installSend() throws ReflectiveOperationException {
-        Class<?> sender = Class.forName(
-                build == MessengerBuild.MESSENGER_586 ? "X.AeP"
-                        : build == MessengerBuild.MESSENGER_585 ? "X.AaM" : "X.9iU", false, loader);
+        Class<?> sender = Class.forName(build == MessengerBuild.MESSENGER_584_1
+                ? "X.9iU" : MessengerHostBindings.typeName(build, "X.AaM"), false, loader);
         function0 = Class.forName("kotlin.jvm.functions.Function0", false, loader);
         Method invoke = function0.getDeclaredMethod("invoke");
         sendMethod = sender.getDeclaredMethod("A00", Long.class, String.class, String.class, function0, function0);
@@ -352,13 +350,11 @@ final class MessengerReadControls {
                 }
             });
         } else {
-            boolean messenger586 = build == MessengerBuild.MESSENGER_586;
-            Class<?> rows = Class.forName(messenger586 ? "X.BGc" : "X.BLI", false, loader);
-            String createRowsName = messenger586 ? "AYs" : "AY8";
-            Method createRows = rows.getDeclaredMethod(createRowsName);
+            Class<?> rows = Class.forName(MessengerHostBindings.typeName(build, "X.BLI"), false, loader);
+            Method createRows = MessengerHostBindings.method(build, rows, "AY8");
             if (createRows.getReturnType() != ArrayList.class)
                 throw new NoSuchMethodException("Messenger unread divider row contract changed");
-            Class<?> divider = Class.forName(messenger586 ? "X.BGp" : "X.BBe", false, loader);
+            Class<?> divider = Class.forName(MessengerHostBindings.typeName(build, "X.BBe"), false, loader);
             XposedBridge.hookMethod(createRows, new XC_MethodHook() {
                 @Override protected void afterHookedMethod(MethodHookParam param) {
                     if (!enabled.getAsBoolean() || !(param.getResult() instanceof ArrayList<?>)) return;

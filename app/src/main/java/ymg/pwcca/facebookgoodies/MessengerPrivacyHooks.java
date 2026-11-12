@@ -87,8 +87,9 @@ final class MessengerPrivacyHooks {
     private void installSeen(ClassLoader loader, MessengerBuild build) {
         try {
             boolean messenger585 = build == MessengerBuild.MESSENGER_585;
-            boolean messenger586 = build == MessengerBuild.MESSENGER_586;
-            String callbackName = messenger586 ? "X.F4U" : messenger585 ? "X.Gmd" : "X.FZ1";
+            boolean messenger586 = build.is586();
+            String callbackName = build == MessengerBuild.MESSENGER_584_1
+                    ? "X.FZ1" : MessengerHostBindings.typeName(build, "X.Gmd");
             int readAction = messenger586 ? 4 : messenger585 ? 5 : 3;
             Class<?> callback = Class.forName(callbackName, false, loader);
             Field kind = callback.getDeclaredField("$t");
@@ -123,8 +124,9 @@ final class MessengerPrivacyHooks {
     private void installTyping(ClassLoader loader, MessengerBuild build) {
         try {
             boolean messenger585 = build == MessengerBuild.MESSENGER_585;
-            boolean messenger586 = build == MessengerBuild.MESSENGER_586;
-            String mqttName = messenger586 ? "X.3hq" : messenger585 ? "X.3hT" : "X.3hu";
+            boolean messenger586 = build.is586();
+            String mqttName = build == MessengerBuild.MESSENGER_584_1
+                    ? "X.3hu" : MessengerHostBindings.typeName(build, "X.3hT");
             Class<?> mqtt = Class.forName(mqttName, false, loader);
             hookVoid(mqtt.getDeclaredMethod("A00", Integer.class, String.class, byte[].class), new XC_MethodHook() {
                 @Override protected void beforeHookedMethod(MethodHookParam param) {
@@ -135,7 +137,8 @@ final class MessengerPrivacyHooks {
                 }
             });
 
-            String callbackName = messenger586 ? "X.Aid" : messenger585 ? "X.Ak3" : "X.9qD";
+            String callbackName = build == MessengerBuild.MESSENGER_584_1
+                    ? "X.9qD" : MessengerHostBindings.typeName(build, "X.Ak3");
             Class<?> callback = Class.forName(callbackName, false, loader);
             Method completion = callback.getDeclaredMethod("onCompletion", Object.class);
             if (messenger585 || messenger586) {
@@ -168,7 +171,7 @@ final class MessengerPrivacyHooks {
         try {
             Class<?> card = Class.forName("com.facebook.messaging.montage.model.MontageCard", false, loader);
             boolean messenger585 = build == MessengerBuild.MESSENGER_585;
-            boolean messenger586 = build == MessengerBuild.MESSENGER_586;
+            boolean messenger586 = build.is586();
             XC_MethodHook skip = new XC_MethodHook() {
                 @Override protected void beforeHookedMethod(MethodHookParam param) {
                     if (storySeen) {
@@ -178,7 +181,7 @@ final class MessengerPrivacyHooks {
                 }
             };
             if (messenger585 || messenger586) {
-                Class<?> callback = Class.forName(messenger586 ? "X.PQS" : "X.K4W", false, loader);
+                Class<?> callback = Class.forName(MessengerHostBindings.typeName(build, "X.K4W"), false, loader);
                 Field kind = callback.getDeclaredField("$t");
                 Field futureField = callback.getDeclaredField("A03");
                 kind.setAccessible(true);
@@ -193,8 +196,8 @@ final class MessengerPrivacyHooks {
                             storiesBlocked.incrementAndGet();
                     }
                 });
-                Class<?> handler = Class.forName(messenger586 ? "X.PJA" : "X.VIG", false, loader);
-                hookVoid(handler.getDeclaredMethod(messenger586 ? "DZb" : "DTN", card, boolean.class), skip);
+                Class<?> handler = Class.forName(MessengerHostBindings.typeName(build, "X.VIG"), false, loader);
+                hookVoid(MessengerHostBindings.method(build, handler, "DTN", card, boolean.class), skip);
             } else {
                 for (String name : new String[]{"X.Nwi", "X.Nwj"}) {
                     Class<?> handler = Class.forName(name, false, loader);
