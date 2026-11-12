@@ -20,9 +20,9 @@ These hooks target Facebook for Android (`com.facebook.katana`):
 | --- | ---: |
 | **584.1.0.61.98** | **346817021** |
 | **585.0.0.53.94** | **347015062** |
-| **586.0.0.55.92** | **347215273** |
+| **586.0.0.55.92** | **347215273, 347215343** |
 
-Each Messenger (`com.facebook.orca`) build uses exact, build-specific bindings. Add Messenger to the module's LSPosed scope separately. Supported Messenger features are hiding the Meta AI floating button, suppressing read receipts, typing status and story views, and the local-read and manual-seen controls.
+Each Messenger (`com.facebook.orca`) build uses exact, build-specific bindings. The two 586.0.0.55.92 codes ship different obfuscation maps, so each one has its own binding table. Add Messenger to the module's LSPosed scope separately. Supported Messenger features are hiding the Meta AI floating button, suppressing read receipts, typing status and story views, and the local-read and manual-seen controls.
 
 ## Verification status
 

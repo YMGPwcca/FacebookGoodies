@@ -7,3 +7,4 @@ local.properties
 Thumbs.db
 device-verification*.json
 **/__pycache__/
+**/.cxx/
