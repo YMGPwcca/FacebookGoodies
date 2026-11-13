@@ -22,9 +22,25 @@ These hooks target Facebook for Android (`com.facebook.katana`):
 | **585.0.0.53.94** | **347015062** |
 | **586.0.0.55.92** | **347215273, 347215343** |
 
-Each Messenger (`com.facebook.orca`) build uses exact, build-specific bindings. The two 586.0.0.55.92 codes ship different obfuscation maps, so each one has its own binding table. Add Messenger to the module's LSPosed scope separately. Supported Messenger features are hiding the Meta AI floating button, suppressing read receipts, typing status and story views, and the local-read and manual-seen controls.
+Each Messenger (`com.facebook.orca`) build uses exact, build-specific bindings. The two 586.0.0.55.92 codes ship different obfuscation maps, so each one has its own binding table. Add Messenger to the module's LSPosed scope separately. Supported Messenger features are hiding the Meta AI floating button, suppressing read receipts, typing status, story views and active status, hiding inbox ads, the local-read and manual-seen controls, and the per-chat read-receipt item in the conversation menu.
+
+## Feature targeting
+
+Starting with 1.5.0, new features target only the newest supported host build for each app: Facebook 586.0.0.52.53 and Messenger 586.0.0.55.92 (both 586 codes). Existing features keep working on the older supported builds, but new work is not backported to 582-585 or Messenger 584-585.
 
 ## Verification status
+
+### Messenger 1.5.0 additions
+
+The presence, inbox-ad, AI-summary and per-chat receipt hooks were resolved against the DEX of Messenger 584.1.0.61.98, 585.0.0.53.94, 586.0.0.55.92 / 347215273 and 586.0.0.55.92 / 347215343:
+
+- Presence managers declare `onAppActive`, `onAppPaused`, `onAppStopped`, `onDeviceActive` and `onDeviceStopped` in both `DefaultPresenceManager` and `PresenceManagerV2` on every build; both Distributed Gateway clients declare `setPresenceUserSettingEnabled(boolean, String)`.
+- The inbox supplier has one `ImmutableList` field and one no-argument method returning `ImmutableList` on every build; `ThreadSummary` has exactly one `AdContextData` field.
+- The conversation menu fragment has one `List` field and one no-argument method returning `List`; the thread menu controller has exactly one static `void` method taking `View`, `InboxTrackableItem` and `ThreadSummary`. The controller class names differ per build and are bound in `MessengerHostBindings`.
+- The menu item class has one constructor with two `String` parameters and a `kotlin.jvm.functions.Function0` parameter on every build.
+- The AI summary floating pill handler has one private `void` method with a single parameter; the top jump pill runnable declares `run()`. Both are bound per build in `MessengerHostBindings`.
+
+None of these additions has been run on a device. The diagnostics counters (`Active status reports stopped`, `Inbox ads removed`, `Per-chat receipt toggles`, `AI summary pills removed`) show whether each hook fires on the installed build.
 
 ### Facebook 583 and 584
 
@@ -90,8 +106,12 @@ Facebook ships `skipSetDataSpaceForSDR = true`, so its renderer never calls `ANa
 - Local read watermarks live in Messenger's private preferences under hashed thread keys. Message text is not stored.
 - **Mark chats read locally** changes the local chat-list state on its own and does not send a receipt. It defaults to on, which keeps the previous behavior; turn it off to let a chat stay visibly unread while receipts are blocked.
 - **Show message status icons** draws a crossed-out eye beside incoming messages newer than the last confirmed receipt and an unsend icon beside observed incoming tombstones. It is independent of the other switches and defaults to on. On 585 and 586 the eye follows the host's live synchronized read watermark, so it clears when the other side reads. On 584 the baseline comes from receipts this module blocked or sent manually, so an eye can stay until a receipt is sent.
+- **Hide active status** stops the host presence managers from processing app activity and forces the Distributed Gateway presence setting off. As with Messenger's own Active Status switch, friends may stop showing as active while this is on. The lifecycle hooks are resolved by non-obfuscated class and method names on all supported builds; the Distributed Gateway client is optional and is skipped when a build does not ship it.
+- **Hide inbox ads** removes thread rows whose model carries the host's `AdContextData`. The filter runs on the inbox thread-list supplier before rows become items, so sponsored rows never reach the list adapter. It does not remove Marketplace, Huddle or Meta AI rows. The counter shows how many rows were removed; if it stays at zero while sponsored rows still appear, the host is serving them through another supplier.
+- **Per-chat read receipts** adds a **Read receipts: On/Off** item to the conversation long-press menu while **Hide read receipts** is on. The item is injected into the menu's own item list, so it goes through the host's normal click handling and dismissal. Turning it on lets the modular mark-read path send seen for that chat; the global suppression still covers the other mark-read entry points. The exception is stored in Messenger's private preferences under a hashed thread key and can be toggled again from the same menu.
+- **Hide AI summary pill** stops the floating `Summarize N unread messages` pill and the top jump pill controller that builds the same label. It uses the build's AI summary handler and label runnable, both resolved by their stable class names and shapes. The counter increments for each suppressed pill update.
 - Updating the module keeps existing switch values.
-- Diagnostics report loaded hook groups and intercepted read, typing and story signals. Counts are actions in the current process, not unique messages or viewers.
+- Diagnostics report loaded hook groups and intercepted read, typing, story, presence and inbox-ad signals. Counts are actions in the current process, not unique messages or viewers.
 
 ## Downloads
 

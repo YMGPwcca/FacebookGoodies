@@ -8,7 +8,7 @@ An LSPosed module with feed filters, video downloads and privacy switches for th
 - LSPosed
 - A supported Facebook or Messenger build, listed in [Supported host builds](SUPPORT.md)
 
-The module checks the installed version name and version code against that list. An unlisted build runs with its hooks disabled, and its tab reports **Unsupported**.
+The module checks the installed version name and version code against that list. An unlisted build runs with its hooks disabled, and its tab reports **Unsupported**. New features from 1.5.0 target only the newest supported builds (Facebook 586 and Messenger 586).
 
 ## Setup
 
@@ -46,6 +46,10 @@ The module checks the installed version name and version code against that list.
 - **Hide typing status** stops Messenger from sending typing activity.
 - **Hide story views** stops Messenger from marking stories seen. Stories may stay unread.
 - **Hide Meta AI button** removes the floating Meta AI button. It is on by default; restart Messenger after changing it.
+- **Hide active status** stops Messenger from reporting that you are active. Friends may stop showing as active too, as when Active Status is off.
+- **Hide inbox ads** removes sponsored conversations from the chat list.
+- **Per-chat read receipts** adds a **Read receipts: On/Off** item to the long-press menu of a conversation. It is available while **Hide read receipts** is on and lets that chat send seen receipts.
+- **Hide AI summary pill** removes the **Summarize N unread messages** pill in chats.
 
 ## Settings behavior
 

@@ -17,14 +17,25 @@ final class MessengerPrivacyHooks {
     private volatile boolean markers;
     private volatile boolean typing;
     private volatile boolean storySeen;
+    private volatile boolean presence;
+    private volatile boolean inboxAds;
+    private volatile boolean aiSummary;
     private final AtomicInteger installedHooks = new AtomicInteger();
     private final AtomicInteger readsBlocked = new AtomicInteger();
     private final AtomicInteger typingBlocked = new AtomicInteger();
     private final AtomicInteger storiesBlocked = new AtomicInteger();
+    private final AtomicInteger presenceBlocked = new AtomicInteger();
+    private final AtomicInteger inboxAdsRemoved = new AtomicInteger();
+    private final AtomicInteger summaryHidden = new AtomicInteger();
     private final AtomicInteger errors = new AtomicInteger();
     private boolean aiFabInstalled;
+    private int presenceHooks;
+    private int inboxAdHook;
+    private int summaryHooks;
+    private int chatMenuHooks;
     private MessengerReadControls readControls;
     private MessengerMessageBorders messageBorders;
+    private MessengerChatMenu chatMenu;
 
     static void install(Context app, ClassLoader loader, boolean aiFabInstalled, MessengerBuild build) {
         MessengerPrivacyHooks hooks = new MessengerPrivacyHooks();
@@ -32,7 +43,9 @@ final class MessengerPrivacyHooks {
         hooks.refresh(app);
         XposedBridge.log("FacebookGoodies: Messenger privacy enabled seen=" + hooks.seen
                 + " localRead=" + hooks.localRead + " markers=" + hooks.markers
-                + " typing=" + hooks.typing + " story=" + hooks.storySeen);
+                + " typing=" + hooks.typing + " story=" + hooks.storySeen
+                + " presence=" + hooks.presence + " inboxAds=" + hooks.inboxAds
+                + " aiSummary=" + hooks.aiSummary);
         hooks.installSeen(loader, build);
         hooks.readControls = new MessengerReadControls(app, loader,
                 () -> hooks.seen, () -> hooks.localRead, () -> hooks.markers, build);
@@ -42,6 +55,11 @@ final class MessengerPrivacyHooks {
         hooks.messageBorders.install();
         hooks.installTyping(loader, build);
         hooks.installStorySeen(loader, build);
+        hooks.installPresence(loader);
+        hooks.installInboxAds(loader);
+        hooks.installAiSummary(loader, build);
+        hooks.chatMenu = new MessengerChatMenu(loader, build, hooks.readControls, () -> hooks.seen);
+        hooks.chatMenuHooks = hooks.chatMenu.install();
         hooks.report(app);
         Executors.newSingleThreadScheduledExecutor(r -> {
             Thread thread = new Thread(r, "FacebookGoodies-Messenger-settings");
@@ -58,13 +76,20 @@ final class MessengerPrivacyHooks {
         status.putBoolean("supported", true);
         status.putInt("hooks", installedHooks.get() + (aiFabInstalled ? 1 : 0)
                 + (readControls == null ? 0 : readControls.installedGroups())
-                + (messageBorders == null ? 0 : messageBorders.installedHooks()));
+                + (messageBorders == null ? 0 : messageBorders.installedHooks())
+                + presenceHooks + inboxAdHook + summaryHooks + chatMenuHooks);
         status.putInt("aiFab", aiFabInstalled ? 1 : 0);
         status.putInt("reads", readsBlocked.get() + (readControls == null ? 0 : readControls.blockedCount()));
         status.putInt("typing", typingBlocked.get());
         status.putInt("stories", storiesBlocked.get());
+        status.putInt("presence", presenceBlocked.get());
+        status.putInt("inboxAds", inboxAdsRemoved.get());
+        status.putInt("aiSummary", summaryHidden.get());
+        status.putInt("chatMenu", chatMenu == null ? 0 : chatMenu.toggleCount());
+        status.putInt("chatMenuShown", chatMenu == null ? 0 : chatMenu.shownCount());
         status.putInt("errors", errors.get() + (readControls == null ? 0 : readControls.errorCount())
-                + (messageBorders == null ? 0 : messageBorders.errorCount()));
+                + (messageBorders == null ? 0 : messageBorders.errorCount())
+                + (chatMenu == null ? 0 : chatMenu.errorCount()));
         try { app.getContentResolver().call(SettingsProvider.URI, "report", null, status); }
         catch (RuntimeException ignored) { }
     }
@@ -77,8 +102,11 @@ final class MessengerPrivacyHooks {
             markers = config != null && config.getBoolean("messenger_markers");
             typing = config != null && config.getBoolean("messenger_typing");
             storySeen = config != null && config.getBoolean("messenger_story_seen");
+            presence = config != null && config.getBoolean("messenger_presence");
+            inboxAds = config != null && config.getBoolean("messenger_inbox_ads");
+            aiSummary = config != null && config.getBoolean("messenger_ai_summary");
         } catch (RuntimeException failure) {
-            seen = localRead = markers = typing = storySeen = false;
+            seen = localRead = markers = typing = storySeen = presence = inboxAds = aiSummary = false;
         }
         if (readControls != null) readControls.updateButtonVisibility();
         if (messageBorders != null) messageBorders.refresh();
@@ -208,6 +236,39 @@ final class MessengerPrivacyHooks {
         } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
             errors.incrementAndGet();
             XposedBridge.log("FacebookGoodies: Messenger story seen hook unavailable: " + failure.getClass().getSimpleName());
+        }
+    }
+
+    private void installPresence(ClassLoader loader) {
+        try {
+            presenceHooks = MessengerPresenceHooks.install(loader, () -> presence, presenceBlocked);
+            XposedBridge.log("FacebookGoodies: Messenger presence hooks=" + presenceHooks);
+        } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
+            errors.incrementAndGet();
+            XposedBridge.log("FacebookGoodies: Messenger presence hook unavailable: "
+                    + failure.getClass().getSimpleName());
+        }
+    }
+
+    private void installInboxAds(ClassLoader loader) {
+        try {
+            inboxAdHook = MessengerInboxAds.install(loader, () -> inboxAds, inboxAdsRemoved);
+            XposedBridge.log("FacebookGoodies: Messenger inbox ads hook installed");
+        } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
+            errors.incrementAndGet();
+            XposedBridge.log("FacebookGoodies: Messenger inbox ads hook unavailable: "
+                    + failure.getClass().getSimpleName());
+        }
+    }
+
+    private void installAiSummary(ClassLoader loader, MessengerBuild build) {
+        try {
+            summaryHooks = MessengerAiSummary.install(loader, build, () -> aiSummary, summaryHidden);
+            XposedBridge.log("FacebookGoodies: Messenger AI summary hooks=" + summaryHooks);
+        } catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
+            errors.incrementAndGet();
+            XposedBridge.log("FacebookGoodies: Messenger AI summary hook unavailable: "
+                    + failure.getClass().getSimpleName());
         }
     }
 

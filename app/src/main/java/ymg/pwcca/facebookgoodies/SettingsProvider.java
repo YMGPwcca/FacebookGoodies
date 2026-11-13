@@ -14,7 +14,7 @@ public final class SettingsProvider extends ContentProvider {
     static final Uri URI = Uri.parse("content://ymg.pwcca.facebookgoodies.settings");
     static final String PREFS = "controls";
     private static final String[] COUNTERS = {"hooks", "ads", "suggestions", "reads", "captures", "errors", "starts", "pid", "cacheCalls", "renderCalls", "cacheRemoved", "renderRemoved", "videoHooks", "reelsAds", "videoAds", "videoResponses", "videoUnmatched", "videoSourceCode", "reelsLaunchFlags", "affiliateCards", "videoMetadata", "videoCards", "videoRange", "contentHooks", "threads", "storiesTop", "storiesMiddle", "reels"};
-    private static final String[] MESSENGER_COUNTERS = {"hooks", "reads", "typing", "stories", "errors", "aiFab"};
+    private static final String[] MESSENGER_COUNTERS = {"hooks", "reads", "typing", "stories", "errors", "aiFab", "presence", "inboxAds", "chatMenu", "chatMenuShown", "aiSummary"};
     @Override public boolean onCreate() { return true; }
     private boolean isFacebook(int uid) {
         String[] names = getContext().getPackageManager().getPackagesForUid(uid);
@@ -43,7 +43,8 @@ public final class SettingsProvider extends ContentProvider {
         out.putBoolean("downloads", prefs.getBoolean("downloads", true));
         out.putBoolean("video_range", prefs.getBoolean("video_range", false));
         for (String key : new String[]{"messenger_seen", "messenger_local_read",
-                "messenger_markers", "messenger_typing", "messenger_story_seen", "messenger_hide_ai"})
+                "messenger_markers", "messenger_typing", "messenger_story_seen", "messenger_hide_ai",
+                "messenger_presence", "messenger_inbox_ads", "messenger_ai_summary"})
             out.putBoolean(key, prefs.getBoolean(key, true));
         for (String key : new String[]{"hide_threads", "hide_stories_top", "hide_stories_middle", "hide_reels"})
             out.putBoolean(key, prefs.getBoolean(key, false));

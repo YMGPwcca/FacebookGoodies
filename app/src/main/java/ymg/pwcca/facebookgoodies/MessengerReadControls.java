@@ -43,8 +43,10 @@ final class MessengerReadControls {
     private final BooleanSupplier markersEnabled;
     private final MessengerBuild build;
     private final SharedPreferences localReads;
+    private final SharedPreferences receiptOverrides;
     private final Handler main = new Handler(Looper.getMainLooper());
     private final AtomicInteger blocked = new AtomicInteger();
+    private final AtomicInteger allowed = new AtomicInteger();
     private final AtomicInteger dividerBlocks = new AtomicInteger();
     private final AtomicInteger installedGroups = new AtomicInteger();
     private final AtomicInteger errors = new AtomicInteger();
@@ -92,6 +94,7 @@ final class MessengerReadControls {
         this.markersEnabled = markersEnabled;
         this.build = build;
         this.localReads = app.getSharedPreferences("facebookgoodies_local_reads", Context.MODE_PRIVATE);
+        this.receiptOverrides = app.getSharedPreferences("facebookgoodies_receipts", Context.MODE_PRIVATE);
     }
 
     void install() {
@@ -104,7 +107,30 @@ final class MessengerReadControls {
 
     int installedGroups() { return installedGroups.get(); }
     int blockedCount() { return blocked.get(); }
+    int allowedCount() { return allowed.get(); }
     int errorCount() { return errors.get(); }
+
+    String threadKeyOf(Object summary) {
+        if (summaryThread == null) return null;
+        try {
+            Object key = summaryThread.get(summary);
+            return key == null ? null : key.toString();
+        } catch (IllegalAccessException | RuntimeException failure) {
+            logFailure("thread key", failure);
+            return null;
+        }
+    }
+
+    boolean receiptsAllowedFor(String thread) {
+        return thread != null && receiptOverrides.getBoolean("allowed_" + prefKey(thread), false);
+    }
+
+    boolean setReceiptsAllowed(String thread, boolean allowed) {
+        String key = "allowed_" + prefKey(thread);
+        if (allowed) receiptOverrides.edit().putBoolean(key, true).apply();
+        else receiptOverrides.edit().remove(key).apply();
+        return allowed;
+    }
 
     void setBorderRefresh(Runnable refresh) { borderRefresh = refresh; }
     void setVisibleThreadResolver(Function<View, String> resolver) { visibleThread = resolver; }
@@ -251,6 +277,10 @@ final class MessengerReadControls {
                 String key = threadBySdk.get(sdkId);
                 if (key != null) rememberLocalRead(key, readTime);
                 if (!enabled.getAsBoolean()) return;
+                if (key != null && receiptsAllowedFor(key)) {
+                    allowed.incrementAndGet();
+                    return;
+                }
                 Long watermark = readTime != null ? readTime : lastMessageFor(sdkId);
                 boolean previouslySent = alreadySent(sdkId, watermark);
                 if (!previouslySent)

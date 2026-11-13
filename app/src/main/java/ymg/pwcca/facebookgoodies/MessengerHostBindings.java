@@ -47,6 +47,7 @@ final class MessengerHostBindings {
         RELEASE_586.put("X.VIG", "X.PJA");
         RELEASE_586.put("X.75Q", "X.6wY");
         RELEASE_586.put("X.1IG", "X.1Gl");
+        RELEASE_586.put("X.4LQ", "X.4gP");
 
         // 585 base name -> 586 rebuild (347215343)
         REBUILD_586.put("X.AQ8", "X.APh");
@@ -83,6 +84,7 @@ final class MessengerHostBindings {
         REBUILD_586.put("X.VIG", "X.PVi");
         REBUILD_586.put("X.75Q", "X.6zF");
         REBUILD_586.put("X.1IG", "X.1Gk");
+        REBUILD_586.put("X.4LQ", "X.4hk");
     }
 
     static java.util.Set<String> baseNames() { return java.util.Collections.unmodifiableSet(RELEASE_586.keySet()); }
@@ -97,6 +99,28 @@ final class MessengerHostBindings {
         String mapped = table.get(baseName);
         if (mapped == null) throw new ClassNotFoundException("Unmapped Messenger type: " + baseName);
         return mapped;
+    }
+
+    /** Thread list menu controller; 584 keeps a distinct base name. */
+    static String menuController(MessengerBuild build) throws ClassNotFoundException {
+        if (build == MessengerBuild.MESSENGER_584_1) return "X.4Ts";
+        return typeName(build, "X.4LQ");
+    }
+
+    /** In-thread AI summary floating pill handler. */
+    static String summaryPillHandler(MessengerBuild build) {
+        if (build == MessengerBuild.MESSENGER_584_1) return "X.9XY";
+        if (build == MessengerBuild.MESSENGER_585) return "X.Ado";
+        if (build == MessengerBuild.MESSENGER_586) return "X.AIu";
+        return "X.AMT";
+    }
+
+    /** Top jump pill controller runnable that builds the unread summary label. */
+    static String summaryJumpPill(MessengerBuild build) {
+        if (build == MessengerBuild.MESSENGER_584_1) return "X.9T0";
+        if (build == MessengerBuild.MESSENGER_585) return "X.AUP";
+        if (build == MessengerBuild.MESSENGER_586) return "X.AIt";
+        return "X.AMS";
     }
 
     static Method method(MessengerBuild build, Class<?> owner, String name, Class<?>... parameters)

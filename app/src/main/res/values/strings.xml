@@ -42,6 +42,11 @@
     <string name="diagnostic_messenger_typing">Typing signals blocked</string>
     <string name="diagnostic_messenger_stories">Story views blocked</string>
     <string name="diagnostic_messenger_ai">Meta AI hook loaded</string>
+    <string name="diagnostic_messenger_presence">Active status reports stopped</string>
+    <string name="diagnostic_messenger_inbox_ads">Inbox ads removed</string>
+    <string name="diagnostic_messenger_chat_menu">Per-chat receipt toggles</string>
+    <string name="diagnostic_messenger_chat_menu_shown">Per-chat receipt items shown</string>
+    <string name="diagnostic_messenger_ai_summary">AI summary pills removed</string>
     <string name="section_feed">Feed</string>
     <string name="section_privacy">Privacy</string>
     <string name="section_chats">Chats</string>
@@ -58,6 +63,13 @@
     <string name="messenger_story_seen_description">Prevent Messenger from marking stories seen. Stories may stay unread.</string>
     <string name="messenger_hide_ai">Hide Meta AI button</string>
     <string name="messenger_hide_ai_description">Hide the floating Meta AI button. Restart Messenger after changing.</string>
+    <string name="section_inbox">Inbox</string>
+    <string name="messenger_presence">Hide active status</string>
+    <string name="messenger_presence_description">Stop Messenger from reporting that you are active. Friends may no longer show as active, as with Active Status off.</string>
+    <string name="messenger_inbox_ads">Hide inbox ads</string>
+    <string name="messenger_inbox_ads_description">Remove sponsored conversations from the chat list.</string>
+    <string name="messenger_ai_summary">Hide AI summary pill</string>
+    <string name="messenger_ai_summary_description">Remove the Summarize unread messages pill in chats.</string>
     <string name="section_content">Feed content</string>
     <string name="section_downloads">Downloads</string>
     <string name="download_current_video">Download current video</string>

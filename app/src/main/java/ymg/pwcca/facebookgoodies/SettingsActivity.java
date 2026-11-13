@@ -238,6 +238,15 @@ public final class SettingsActivity extends Activity {
             addDivider(chats);
             addSetting(page, chats, "messenger_hide_ai", R.string.messenger_hide_ai,
                     R.string.messenger_hide_ai_description, true);
+            addDivider(chats);
+            addSetting(page, chats, "messenger_ai_summary", R.string.messenger_ai_summary,
+                    R.string.messenger_ai_summary_description, true);
+            LinearLayout privacy = addGroup(page, R.string.section_privacy);
+            addSetting(page, privacy, "messenger_presence", R.string.messenger_presence,
+                    R.string.messenger_presence_description, true);
+            LinearLayout inbox = addGroup(page, R.string.section_inbox);
+            addSetting(page, inbox, "messenger_inbox_ads", R.string.messenger_inbox_ads,
+                    R.string.messenger_inbox_ads_description, true);
             LinearLayout stories = addGroup(page, R.string.section_stories);
             addSetting(page, stories, "messenger_story_seen", R.string.messenger_story_seen, R.string.messenger_story_seen_description, true);
         }
@@ -435,6 +444,11 @@ public final class SettingsActivity extends Activity {
             addCounter(page, "typing", R.string.diagnostic_messenger_typing);
             addCounter(page, "stories", R.string.diagnostic_messenger_stories);
             addCounter(page, "aiFab", R.string.diagnostic_messenger_ai);
+            addCounter(page, "presence", R.string.diagnostic_messenger_presence);
+            addCounter(page, "inboxAds", R.string.diagnostic_messenger_inbox_ads);
+            addCounter(page, "chatMenu", R.string.diagnostic_messenger_chat_menu);
+            addCounter(page, "chatMenuShown", R.string.diagnostic_messenger_chat_menu_shown);
+            addCounter(page, "aiSummary", R.string.diagnostic_messenger_ai_summary);
         }
         addCounter(page, "errors", R.string.diagnostic_errors);
         Button reload = textButton(R.string.refresh, page.accent);
