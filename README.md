@@ -8,7 +8,7 @@ An LSPosed module with feed filters, video downloads and privacy switches for th
 - LSPosed
 - A supported Facebook or Messenger build, listed in [Supported host builds](SUPPORT.md)
 
-The module checks the installed version name and version code against that list. An unlisted build runs with its hooks disabled, and its tab reports **Unsupported**. Facebook 587–588 and Messenger 588 show **Testing required** while device coverage is incomplete. See [Supported host builds](SUPPORT.md) for exact versions.
+The module checks the installed version name and version code against that list. Its tab displays **Supported** for a listed build. An unlisted build runs with its hooks disabled, and its tab reports **Unsupported**. See [Supported host builds](SUPPORT.md) for exact versions and device test coverage.
 
 ## Setup
 

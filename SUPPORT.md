@@ -26,7 +26,7 @@ Each Messenger (`com.facebook.orca`) build uses exact, build-specific bindings. 
 
 ## Newly ported builds
 
-The following exact builds include bindings for the existing controls. The app displays **Testing required** while on-device coverage is incomplete.
+The following exact builds include bindings for the existing controls and display **Supported** in the module. See the verification status below for on-device test coverage.
 
 | App | Version | Version code |
 | --- | --- | ---: |

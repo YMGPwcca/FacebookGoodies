@@ -7,7 +7,6 @@
     <string name="installed_version">Installed version %1$s</string>
     <string name="host_not_installed">App not installed</string>
     <string name="supported">Supported</string>
-    <string name="testing_required">Testing required</string>
     <string name="unsupported">Unsupported</string>
     <string name="support_unavailable">Unavailable</string>
     <string name="no_count">—</string>
