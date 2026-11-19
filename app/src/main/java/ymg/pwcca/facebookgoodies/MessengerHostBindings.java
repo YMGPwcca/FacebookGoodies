@@ -10,6 +10,7 @@ final class MessengerHostBindings {
 
     private static final Map<String, String> RELEASE_586 = new HashMap<>();
     private static final Map<String, String> REBUILD_586 = new HashMap<>();
+    private static final Map<String, String> RELEASE_588 = new HashMap<>();
 
     static {
         // 585 base name -> 586 (347215273)
@@ -85,6 +86,35 @@ final class MessengerHostBindings {
         REBUILD_586.put("X.75Q", "X.6zF");
         REBUILD_586.put("X.1IG", "X.1Gk");
         REBUILD_586.put("X.4LQ", "X.4hk");
+
+        RELEASE_588.put("X.4lW", "X.4k4");
+        RELEASE_588.put("X.AaM", "X.A0I");
+        RELEASE_588.put("X.BLI", "X.BSa");
+        RELEASE_588.put("X.BBe", "X.BSk");
+        RELEASE_588.put("X.50R", "X.4yu");
+        RELEASE_588.put("X.4LQ", "X.4RX");
+        RELEASE_588.put("X.AQ8", "X.AaM");
+        RELEASE_588.put("X.2ED", "X.28I");
+        RELEASE_588.put("X.5OQ", "X.5Ms");
+        RELEASE_588.put("X.6mm", "X.HVp");
+        RELEASE_588.put("X.5Qj", "X.5P8");
+        RELEASE_588.put("X.AS6", "X.Acg");
+        RELEASE_588.put("X.1Tx", "X.1JV");
+        RELEASE_588.put("X.DDG", "X.Fca");
+        RELEASE_588.put("X.AS4", "X.Ace");
+        RELEASE_588.put("X.AS3", "X.Acd");
+        RELEASE_588.put("X.BST", "X.BaH");
+        RELEASE_588.put("X.BIO", "X.BQ2");
+        RELEASE_588.put("X.515", "X.4zX");
+        RELEASE_588.put("X.2Rg", "X.2dB");
+        RELEASE_588.put("X.BIP", "X.BQ3");
+        RELEASE_588.put("X.BHx", "X.BPY");
+        RELEASE_588.put("X.2Qp", "X.2cv");
+        RELEASE_588.put("X.D9j", "X.FYI");
+        RELEASE_588.put("X.262", "X.22A");
+        RELEASE_588.put("X.7Fp", "X.7Jx");
+        RELEASE_588.put("X.2dp", "X.2PN");
+        RELEASE_588.put("X.1Pc", "X.1Hi");
     }
 
     static java.util.Set<String> baseNames() { return java.util.Collections.unmodifiableSet(RELEASE_586.keySet()); }
@@ -94,7 +124,8 @@ final class MessengerHostBindings {
     static String typeName(MessengerBuild build, String baseName) throws ClassNotFoundException {
         if (!baseName.startsWith("X.")) return baseName;
         Map<String, String> table = build == MessengerBuild.MESSENGER_586 ? RELEASE_586
-                : build == MessengerBuild.MESSENGER_586_REBUILD ? REBUILD_586 : null;
+                : build == MessengerBuild.MESSENGER_586_REBUILD ? REBUILD_586
+                : build == MessengerBuild.MESSENGER_588 ? RELEASE_588 : null;
         if (table == null) return baseName;
         String mapped = table.get(baseName);
         if (mapped == null) throw new ClassNotFoundException("Unmapped Messenger type: " + baseName);
@@ -109,6 +140,7 @@ final class MessengerHostBindings {
 
     /** In-thread AI summary floating pill handler. */
     static String summaryPillHandler(MessengerBuild build) {
+        if (build == MessengerBuild.MESSENGER_588) return "X.AYC";
         if (build == MessengerBuild.MESSENGER_584_1) return "X.9XY";
         if (build == MessengerBuild.MESSENGER_585) return "X.Ado";
         if (build == MessengerBuild.MESSENGER_586) return "X.AIu";
@@ -129,8 +161,31 @@ final class MessengerHostBindings {
     }
 
     static String methodName(MessengerBuild build, String owner, String name) {
+        if (build == MessengerBuild.MESSENGER_588) return release588Method(owner, name);
         if (build == MessengerBuild.MESSENGER_586) return releaseMethod(owner, name);
         if (build == MessengerBuild.MESSENGER_586_REBUILD) return rebuildMethod(owner, name);
+        return name;
+    }
+
+    private static String release588Method(String owner, String name) {
+        switch (owner) {
+            case "X.BSa": if ("AY8".equals(name)) return "Ae7"; break;
+            case "X.HVp":
+            case "X.FYI":
+                if ("Cha".equals(name)) return "DIM";
+                if ("D9Z".equals(name)) return "DuN";
+                break;
+            case "X.Acg": if ("AMG".equals(name)) return "ARj"; break;
+            case "X.2cv": if ("CQ1".equals(name)) return "Cr4"; break;
+            case "X.BQ2":
+                if ("A0T".equals(name)) return "A0Q";
+                if ("A0U".equals(name)) return "A0R";
+                break;
+            case "com.facebook.litho.ComponentHost":
+                if ("A0T".equals(name)) return "A0U";
+                if ("A0U".equals(name)) return "A0V";
+                break;
+        }
         return name;
     }
 

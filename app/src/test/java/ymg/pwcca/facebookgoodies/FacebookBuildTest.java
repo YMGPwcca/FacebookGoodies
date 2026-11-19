@@ -25,4 +25,16 @@ public final class FacebookBuildTest {
         assertEquals(FacebookBuild.UNSUPPORTED, FacebookBuild.identify("586.0.0.52.53", 476217122L));
         assertEquals(FacebookBuild.UNSUPPORTED, FacebookBuild.identify("585.0.0.47.54", 476217123L));
     }
+
+    @Test public void identifiesOnlyTheExact587Build() {
+        assertEquals(FacebookBuild.FACEBOOK_587, FacebookBuild.identify("587.0.0.39.55", 707414483L));
+        assertEquals(FacebookBuild.UNSUPPORTED, FacebookBuild.identify("587.0.0.39.55", 707414482L));
+        assertEquals(FacebookBuild.UNSUPPORTED, FacebookBuild.identify("587.0.0.39.54", 707414483L));
+    }
+
+    @Test public void identifiesOnlyTheExact588Build() {
+        assertEquals(FacebookBuild.FACEBOOK_588, FacebookBuild.identify("588.0.0.42.55", 707615136L));
+        assertEquals(FacebookBuild.UNSUPPORTED, FacebookBuild.identify("588.0.0.42.55", 707615135L));
+        assertEquals(FacebookBuild.UNSUPPORTED, FacebookBuild.identify("588.0.0.42.54", 707615136L));
+    }
 }

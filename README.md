@@ -8,7 +8,7 @@ An LSPosed module with feed filters, video downloads and privacy switches for th
 - LSPosed
 - A supported Facebook or Messenger build, listed in [Supported host builds](SUPPORT.md)
 
-The module checks the installed version name and version code against that list. An unlisted build runs with its hooks disabled, and its tab reports **Unsupported**. New features from 1.5.0 target only the newest supported builds (Facebook 586 and Messenger 586).
+The module checks the installed version name and version code against that list. An unlisted build runs with its hooks disabled, and its tab reports **Unsupported**. Facebook 587–588 and Messenger 588 show **Testing required** while device coverage is incomplete. See [Supported host builds](SUPPORT.md) for exact versions.
 
 ## Setup
 
@@ -42,7 +42,7 @@ The module checks the installed version name and version code against that list.
 
 - **Hide read receipts** stops Messenger from sending read receipts. A dot on the emoji button marks a pending receipt, and holding the emoji button sends seen.
 - **Mark chats read locally** keeps the chat list read on this device without sending a receipt. It is on by default.
-- **Show message status icons** marks incoming messages that still wait for a read receipt, and incoming messages the sender unsent. It is on by default.
+- **Show message status icons** marks incoming messages that still wait for a read receipt, including messages the sender unsent. It is on by default.
 - **Hide typing status** stops Messenger from sending typing activity.
 - **Hide story views** stops Messenger from marking stories seen. Stories may stay unread.
 - **Hide Meta AI button** removes the floating Meta AI button. It is on by default; restart Messenger after changing it.

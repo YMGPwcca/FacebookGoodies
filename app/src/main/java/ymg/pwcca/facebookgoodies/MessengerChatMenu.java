@@ -220,7 +220,7 @@ final class MessengerChatMenu {
                         List<Object> kept = new ArrayList<>(list.size());
                         Object template = null;
                         for (Object item : list) {
-                            if (shape.id.getInt(item) == RECEIPT_ITEM_ID) continue;
+                            if (shape.idOf(item) == RECEIPT_ITEM_ID) continue;
                             if (template == null) template = item;
                             kept.add(item);
                         }
@@ -271,13 +271,17 @@ final class MessengerChatMenu {
                     if (!hidden.getAsBoolean() || !(param.args[0] instanceof Object)) return;
                     Object item = param.args[0];
                     String thread = sheetThreads.get(param.thisObject);
-                    if (thread == null || item.getClass() != itemType) return;
+                    if (thread == null || (bottom.proxyInterface == null && item.getClass() != itemType)) return;
                     try {
-                        if (bottom.id.getInt(item) != RECEIPT_ITEM_ID) return;
+                        if (bottom.idOf(item) != RECEIPT_ITEM_ID) return;
                         param.setResult(null);
                         toggle(thread);
-                        refreshSheet(sheetFragments.get(param.thisObject), thread);
-                    } catch (IllegalAccessException | RuntimeException failure) {
+                        Object fragment = sheetFragments.get(param.thisObject);
+                        if (build == MessengerBuild.MESSENGER_588 && fragment != null)
+                            fragment.getClass().getMethod("A1N").invoke(fragment);
+                        else
+                            refreshSheet(fragment, thread);
+                    } catch (ReflectiveOperationException | RuntimeException failure) {
                         errors.incrementAndGet();
                     }
                 }
@@ -296,7 +300,7 @@ final class MessengerChatMenu {
             List<Object> kept = new ArrayList<>();
             Object template = null;
             for (Object item : (List<?>) current) {
-                if (bottom.id.getInt(item) == RECEIPT_ITEM_ID) continue;
+                if (bottom.idOf(item) == RECEIPT_ITEM_ID) continue;
                 if (template == null) template = item;
                 kept.add(item);
             }
@@ -498,8 +502,15 @@ final class MessengerChatMenu {
             if (constructor != null) throw new NoSuchMethodException("bottom menu item constructor is ambiguous");
             constructor = candidate;
         }
-        if (constructor == null) throw new NoSuchMethodException("bottom menu item constructor not found");
-        constructor.setAccessible(true);
+        Class<?> proxyInterface = null;
+        if (constructor == null && build == MessengerBuild.MESSENGER_588) {
+            proxyInterface = Class.forName("X.HVf", false, loader);
+            if (!proxyInterface.isAssignableFrom(itemType))
+                throw new NoSuchMethodException("bottom menu item interface not found");
+        } else if (constructor == null) {
+            throw new NoSuchMethodException("bottom menu item constructor not found");
+        }
+        if (constructor != null) constructor.setAccessible(true);
         Field callback = null;
         for (Field field : type.getDeclaredFields()) {
             if (field.getType() == items.getType()) continue;
@@ -515,7 +526,7 @@ final class MessengerChatMenu {
         callback.setAccessible(true);
         Method copyOf = Class.forName(IMMUTABLE_LIST, false, loader).getMethod("copyOf", Iterable.class);
         BottomShape resolved = new BottomShape(type, items, summary, callback, itemType,
-                id, title, constructor, itemFields, copyOf);
+                id, title, constructor, itemFields, copyOf, proxyInterface);
         bottom = resolved;
         return resolved;
     }
@@ -570,9 +581,11 @@ final class MessengerChatMenu {
         final Constructor<?> constructor;
         final Field[] fields;
         final Method copyOf;
+        final Class<?> proxyInterface;
 
         BottomShape(Class<?> builderType, Field items, Field summary, Field callback, Class<?> itemType,
-                    Field id, Field title, Constructor<?> constructor, Field[] fields, Method copyOf) {
+                    Field id, Field title, Constructor<?> constructor, Field[] fields, Method copyOf,
+                    Class<?> proxyInterface) {
             this.builderType = builderType;
             this.items = items;
             this.summary = summary;
@@ -583,9 +596,26 @@ final class MessengerChatMenu {
             this.constructor = constructor;
             this.fields = fields;
             this.copyOf = copyOf;
+            this.proxyInterface = proxyInterface;
+        }
+
+        int idOf(Object item) throws ReflectiveOperationException {
+            if (proxyInterface != null)
+                return (Integer) proxyInterface.getMethod("getId").invoke(item);
+            return id.getInt(item);
         }
 
         Object clone(Object template, String title) throws ReflectiveOperationException {
+            if (proxyInterface != null) {
+                return Proxy.newProxyInstance(proxyInterface.getClassLoader(), new Class<?>[]{proxyInterface},
+                        (proxy, method, args) -> {
+                            if ("getId".equals(method.getName())) return RECEIPT_ITEM_ID;
+                            if ("getTitle".equals(method.getName()) || "BVg".equals(method.getName())) return title;
+                            if ("equals".equals(method.getName())) return proxy == args[0];
+                            if ("hashCode".equals(method.getName())) return System.identityHashCode(proxy);
+                            return method.invoke(template, args);
+                        });
+            }
             Class<?>[] parameters = constructor.getParameterTypes();
             Object[] arguments = new Object[parameters.length];
             Map<Class<?>, Integer> used = new LinkedHashMap<>();

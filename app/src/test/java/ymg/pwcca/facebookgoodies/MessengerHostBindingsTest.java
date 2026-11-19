@@ -36,5 +36,23 @@ public final class MessengerHostBindingsTest {
         assertEquals("X.4LQ", MessengerHostBindings.menuController(MessengerBuild.MESSENGER_585));
         assertEquals("X.4gP", MessengerHostBindings.menuController(MessengerBuild.MESSENGER_586));
         assertEquals("X.4hk", MessengerHostBindings.menuController(MessengerBuild.MESSENGER_586_REBUILD));
+        assertEquals("X.4RX", MessengerHostBindings.menuController(MessengerBuild.MESSENGER_588));
+    }
+
+    @Test public void messenger588UsesTheVerifiedRowAndReadBindings() throws Exception {
+        assertEquals("X.4k4", MessengerHostBindings.typeName(MessengerBuild.MESSENGER_588, "X.4lW"));
+        assertEquals("X.A0I", MessengerHostBindings.typeName(MessengerBuild.MESSENGER_588, "X.AaM"));
+        assertEquals("X.BQ2", MessengerHostBindings.typeName(MessengerBuild.MESSENGER_588, "X.BIO"));
+        assertEquals("X.2dB", MessengerHostBindings.typeName(MessengerBuild.MESSENGER_588, "X.2Rg"));
+        assertEquals("Ae7", MessengerHostBindings.methodName(MessengerBuild.MESSENGER_588, "X.BSa", "AY8"));
+        assertEquals("A0R", MessengerHostBindings.methodName(MessengerBuild.MESSENGER_588, "X.BQ2", "A0U"));
+        assertEquals("A0U", MessengerHostBindings.methodName(MessengerBuild.MESSENGER_588, "com.facebook.litho.ComponentHost", "A0T"));
+        assertEquals("DuN", MessengerHostBindings.methodName(MessengerBuild.MESSENGER_588, "X.HVp", "D9Z"));
+        assertEquals("X.AYC", MessengerHostBindings.summaryPillHandler(MessengerBuild.MESSENGER_588));
+    }
+
+    @Test(expected = ClassNotFoundException.class)
+    public void messenger588RejectsAnUnmappedObfuscatedType() throws Exception {
+        MessengerHostBindings.typeName(MessengerBuild.MESSENGER_588, "X.notMapped");
     }
 }

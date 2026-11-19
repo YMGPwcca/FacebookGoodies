@@ -41,4 +41,10 @@ public final class MessengerBuildTest {
         assertEquals(MessengerBuild.UNSUPPORTED,
                 MessengerBuild.identify(null, 347015062L));
     }
+
+    @Test public void identifiesOnlyTheExact588Build() {
+        assertEquals(MessengerBuild.MESSENGER_588, MessengerBuild.identify("588.0.0.20.98", 347610371L));
+        assertEquals(MessengerBuild.UNSUPPORTED, MessengerBuild.identify("588.0.0.20.98", 347610370L));
+        assertEquals(MessengerBuild.UNSUPPORTED, MessengerBuild.identify("588.0.0.20.97", 347610371L));
+    }
 }

@@ -573,10 +573,11 @@ public final class SettingsActivity extends Activity {
         page.version.setText(host == null ? getString(R.string.host_not_installed)
                 : getString(R.string.installed_version, host.versionName));
         boolean supported = host != null && supportedHost(page.index, host);
-        int supportColor = host == null ? secondaryColor : getColor(supported
-                ? R.color.status_success : R.color.status_error);
+        boolean needsTesting = host != null && newlyPortedHost(page.index, host);
+        int supportColor = host == null ? secondaryColor : getColor(needsTesting
+                ? R.color.status_warning : supported ? R.color.status_success : R.color.status_error);
         page.support.setText(host == null ? R.string.support_unavailable
-                : supported ? R.string.supported : R.string.unsupported);
+                : needsTesting ? R.string.testing_required : supported ? R.string.supported : R.string.unsupported);
         page.support.setTextColor(supportColor);
         page.supportDot.setBackground(rounded(supportColor, 4));
         page.reportTime.setText(updated == 0 ? getString(R.string.no_report_yet)
@@ -596,6 +597,14 @@ public final class SettingsActivity extends Activity {
         if (index == FACEBOOK)
             return FacebookBuild.identify(host.versionName, host.getLongVersionCode()) != FacebookBuild.UNSUPPORTED;
         return MessengerBuild.identify(host.versionName, host.getLongVersionCode()) != MessengerBuild.UNSUPPORTED;
+    }
+
+    private boolean newlyPortedHost(int index, PackageInfo host) {
+        if (index == FACEBOOK) {
+            FacebookBuild build = FacebookBuild.identify(host.versionName, host.getLongVersionCode());
+            return build == FacebookBuild.FACEBOOK_587 || build == FacebookBuild.FACEBOOK_588;
+        }
+        return MessengerBuild.identify(host.versionName, host.getLongVersionCode()) == MessengerBuild.MESSENGER_588;
     }
 
     private Drawable hostIcon(int index) {

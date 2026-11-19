@@ -24,11 +24,47 @@ These hooks target Facebook for Android (`com.facebook.katana`):
 
 Each Messenger (`com.facebook.orca`) build uses exact, build-specific bindings. The two 586.0.0.55.92 codes ship different obfuscation maps, so each one has its own binding table. Add Messenger to the module's LSPosed scope separately. Supported Messenger features are hiding the Meta AI floating button, suppressing read receipts, typing status, story views and active status, hiding inbox ads, the local-read and manual-seen controls, and the per-chat read-receipt item in the conversation menu.
 
+## Newly ported builds
+
+The following exact builds include bindings for the existing controls. The app displays **Testing required** while on-device coverage is incomplete.
+
+| App | Version | Version code |
+| --- | --- | ---: |
+| Facebook | 587.0.0.39.55 | 707414483 |
+| Facebook | 588.0.0.42.55 | 707615136 |
+| Messenger | 588.0.0.20.98 | 347610371 |
+
+The bindings were checked against the APKs pulled from the device. Android reflection and no-op Xposed registration checks covered selected declarations and hook installers. The sections below record the live coverage for both 588 builds.
+
 ## Feature targeting
 
-Starting with 1.5.0, new features target only the newest supported host build for each app: Facebook 586.0.0.52.53 and Messenger 586.0.0.55.92 (both 586 codes). Existing features keep working on the older supported builds, but new work is not backported to 582-585 or Messenger 584-585.
+Starting with 1.5.0, new features target the newest host builds. Older supported builds retain their existing features. New work is not backported to Facebook 582–585 or Messenger 584–585.
 
 ## Verification status
+
+### Facebook 588
+
+Facebook 588 uses updated bindings for News Feed filters, Stories, Threads promotions, video and Reels ads, and video downloads. The two privacy hooks and SDR color range hook use the existing named targets. The new top Stories component is filtered only on News Feed.
+
+**Observed live.** The top Stories switch hid and restored the tray. A Reel downloaded as an MP4 with 1080 × 1920 AV1 video and AAC audio. Diagnostics recorded News Feed filtering, Reels and video ad filtering, and SDR color-range corrections. A system screenshot triggered five blocked screenshot-detection callbacks.
+
+**Still unverified live**
+
+- **Stories in the middle of News Feed.** No inline tray appeared across ten feed screens with hiding off. The render callback passed a controlled test against the installed APK.
+- **Threads cards between videos.** No card was observed during the 14-Reel pass, and the Threads video filter recorded zero removals. The filter's unit tests passed.
+- **Dedicated in-stream ad responses.** All three callbacks passed controlled tests against the installed APK. Live playback exercised ad metadata filtering, and the dedicated response counter stayed at zero.
+- **Facebook in-app read receipts.** The callback passed a controlled test. The Messaging button opened standalone Messenger, so the in-app chat path was unavailable.
+- **Downloads outside Reels.** The live download trial covered the Reels sidebar.
+
+### Messenger 588
+
+**Observed live.** The per-chat read-receipt switch saved both states. Two-account trials on an earlier 1.5.1 build verified read and typing suppression, manual seen, the per-chat receipt override, local-read behavior on a fresh incoming message, Story-view suppression, and the pending-read eye on an unsent message. The new composer was checked separately and displayed the pending-seen badge on Emoji. The floating Meta AI button appeared and disappeared as its switch changed.
+
+**Still unverified live**
+
+- **Inbox ads.** The updated hook filtered sponsored rows in a controlled test with Messenger's actual row classes. No sponsored inbox row appeared with the setting on or off during the device trial.
+- **AI summary pill and active status.** The callbacks recorded live activity. A visible pill comparison and recipient-side presence check are pending.
+- **Manual seen in the new composer.** The badge placement was verified live. Holding Emoji to send a receipt was last verified in the earlier composer layout.
 
 ### Messenger 1.5.0 additions
 
@@ -87,7 +123,7 @@ The optional content filters default to off.
 - **Hide Threads** uses the `PROMOTION` category that the reference mod uses in News Feed, so other units in that category may also be hidden. In Reels and videos it removes only the typed `THREADS_MIDCARD` promotion from incoming lists before a page is created; unknown or unreadable items stay visible.
 - **Hide Reels** removes `FB_SHORTS` and `FB_SHORTS_FALLBACK` feed cards without hiding the Reels tab.
 - **Hide Stories in the middle** removes `MULTI_FB_STORIES_TRAY` feed units and the inline Stories viewer.
-- **Hide Stories at the top** skips both top-tray adapter builders and needs a Facebook restart when changed.
+- **Hide Stories at the top** skips both top-tray adapter builders. Facebook 588 also filters the top Stories renderer on News Feed. Restart Facebook after changing the switch.
 
 ### Privacy
 
@@ -105,9 +141,9 @@ Facebook ships `skipSetDataSpaceForSDR = true`, so its renderer never calls `ANa
 - Threads stay visually read on the device while automatic seen is blocked, including the inbox row and the in-chat unread divider. A small dot appears on the chat's emoji icon while a read receipt is pending; hold emoji to send it, and a short tap still opens emoji.
 - Local read watermarks live in Messenger's private preferences under hashed thread keys. Message text is not stored.
 - **Mark chats read locally** changes the local chat-list state on its own and does not send a receipt. It defaults to on, which keeps the previous behavior; turn it off to let a chat stay visibly unread while receipts are blocked.
-- **Show message status icons** draws a crossed-out eye beside incoming messages newer than the last confirmed receipt and an unsend icon beside observed incoming tombstones. It is independent of the other switches and defaults to on. On 585 and 586 the eye follows the host's live synchronized read watermark, so it clears when the other side reads. On 584 the baseline comes from receipts this module blocked or sent manually, so an eye can stay until a receipt is sent.
+- **Show message status icons** draws a crossed-out eye beside incoming messages newer than the last confirmed receipt, including unsent messages. It is independent of the other switches and defaults to on. On 585 and 586 the eye follows the host's live synchronized read watermark, so it clears when the other side reads. On 584 the baseline comes from receipts this module blocked or sent manually, so an eye can stay until a receipt is sent.
 - **Hide active status** stops the host presence managers from processing app activity and forces the Distributed Gateway presence setting off. As with Messenger's own Active Status switch, friends may stop showing as active while this is on. The lifecycle hooks are resolved by non-obfuscated class and method names on all supported builds; the Distributed Gateway client is optional and is skipped when a build does not ship it.
-- **Hide inbox ads** removes thread rows whose model carries the host's `AdContextData`. The filter runs on the inbox thread-list supplier before rows become items, so sponsored rows never reach the list adapter. It does not remove Marketplace, Huddle or Meta AI rows. The counter shows how many rows were removed; if it stays at zero while sponsored rows still appear, the host is serving them through another supplier.
+- **Hide inbox ads** removes thread rows whose model carries the host's `AdContextData`. Messenger 588 filters the supplier's rendered rows and preserves its source list for pagination and profile prefetch. Earlier builds filter the supplier's input list. The counter records removed rows.
 - **Per-chat read receipts** adds a **Read receipts: On/Off** item to the conversation long-press menu while **Hide read receipts** is on. The item is injected into the menu's own item list, so it goes through the host's normal click handling and dismissal. Turning it on lets the modular mark-read path send seen for that chat; the global suppression still covers the other mark-read entry points. The exception is stored in Messenger's private preferences under a hashed thread key and can be toggled again from the same menu.
 - **Hide AI summary pill** stops the floating `Summarize N unread messages` pill and the top jump pill controller that builds the same label. It uses the build's AI summary handler and label runnable, both resolved by their stable class names and shapes. The counter increments for each suppressed pill update.
 - Updating the module keeps existing switch values.

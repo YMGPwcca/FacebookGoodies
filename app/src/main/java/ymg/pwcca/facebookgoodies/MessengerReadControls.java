@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -11,6 +12,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -36,6 +38,8 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 
 final class MessengerReadControls {
+    private static final int CLOSE_EMOJI_588 = 0x7f144c18;
+    private static final int OPEN_EMOJI_588 = 0x7f144c19;
     private final Context app;
     private final ClassLoader loader;
     private final BooleanSupplier enabled;
@@ -180,7 +184,7 @@ final class MessengerReadControls {
         catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
             logFailure("thread converter", failure);
         }
-        if (build == MessengerBuild.MESSENGER_585 || build.is586()) {
+        if (build == MessengerBuild.MESSENGER_585 || build.is586() || build == MessengerBuild.MESSENGER_588) {
             try { installLiveRead585(); }
             catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
                 logFailure("live read hook", failure);
@@ -204,7 +208,7 @@ final class MessengerReadControls {
                         String thread = key.toString();
                         liveSummaries.put(thread, new WeakReference<>(param.thisObject));
                         observeInitialRead(thread, summaryReadTime.getLong(param.thisObject));
-                        if ((build == MessengerBuild.MESSENGER_585 || build.is586())
+                        if ((build == MessengerBuild.MESSENGER_585 || build.is586() || build == MessengerBuild.MESSENGER_588)
                                 && thread.startsWith("ADVANCED_CRYPTO_"))
                             observeSyncedRead(thread, summaryReadTime.getLong(param.thisObject), false);
                         long lastMessage = summaryLastMessage.getLong(param.thisObject);
@@ -224,7 +228,8 @@ final class MessengerReadControls {
         Class<?> converter = Class.forName(build == MessengerBuild.MESSENGER_584_1
                 ? "X.7gJ" : MessengerHostBindings.typeName(build, "X.4lW"), false, loader);
         Method convert = converter.getDeclaredMethod(
-                build == MessengerBuild.MESSENGER_584_1 ? "A01" : "A02", threadKey);
+                build == MessengerBuild.MESSENGER_584_1 ? "A01"
+                        : build == MessengerBuild.MESSENGER_588 ? "A03" : "A02", threadKey);
         threadConverter = convert;
         XposedBridge.hookMethod(convert, new XC_MethodHook() {
             @Override protected void afterHookedMethod(MethodHookParam param) {
@@ -275,13 +280,13 @@ final class MessengerReadControls {
                 String sdkId = (String) param.args[1];
                 Long readTime = (Long) param.args[0];
                 String key = threadBySdk.get(sdkId);
-                if (key != null) rememberLocalRead(key, readTime);
+                Long watermark = readTime != null ? readTime : lastMessageFor(sdkId);
+                if (key != null) rememberLocalRead(key, watermark);
                 if (!enabled.getAsBoolean()) return;
                 if (key != null && receiptsAllowedFor(key)) {
                     allowed.incrementAndGet();
                     return;
                 }
-                Long watermark = readTime != null ? readTime : lastMessageFor(sdkId);
                 boolean previouslySent = alreadySent(sdkId, watermark);
                 if (!previouslySent)
                     pending.put(sdkId, new Pending(param.thisObject, readTime, watermark,
@@ -462,6 +467,10 @@ final class MessengerReadControls {
             XposedBridge.log("FacebookGoodies: Messenger chat scan awaiting composer");
         if (composer) {
             String thread = visibleThread.apply(root);
+            if (build == MessengerBuild.MESSENGER_588 && thread != null) {
+                Long lastMessage = lastMessageByThread.get(thread);
+                if (lastMessage != null && lastMessage > 0) rememberLocalRead(thread, lastMessage);
+            }
             String mountedSdkId = thread == null ? null : sdkByThread.get(thread);
             if (mountedSdkId != null) {
                 activeSdkId = mountedSdkId;
@@ -521,6 +530,7 @@ final class MessengerReadControls {
         if (editor == null || !(editor.getParent() instanceof ViewGroup)) return null;
         ViewGroup host = (ViewGroup) editor.getParent();
         if (!"com.facebook.litho.ComponentHost".equals(host.getClass().getName())) return null;
+        if (build == MessengerBuild.MESSENGER_588) return findEmoji588(host);
         int tolerance = dp(editor.getContext(), 2);
         View closest = null;
         int closestGap = Integer.MAX_VALUE;
@@ -536,6 +546,25 @@ final class MessengerReadControls {
             }
         }
         return closest;
+    }
+
+    private View findEmoji588(ViewGroup host) {
+        Resources resources = host.getResources();
+        String open;
+        String close;
+        try {
+            open = resources.getString(OPEN_EMOJI_588);
+            close = resources.getString(CLOSE_EMOJI_588);
+        } catch (Resources.NotFoundException missing) {
+            return null;
+        }
+        for (int index = 0; index < host.getChildCount(); index++) {
+            View candidate = host.getChildAt(index);
+            if (!candidate.isShown() || !candidate.isClickable()) continue;
+            CharSequence label = candidate.getContentDescription();
+            if (TextUtils.equals(label, open) || TextUtils.equals(label, close)) return candidate;
+        }
+        return null;
     }
 
     private void setNoticeVisible(View emoji, boolean visible) {

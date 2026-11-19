@@ -92,7 +92,11 @@ final class MessengerMessageBorders {
     int errorCount() { return errors.get(); }
 
     void install() {
-        if (build == MessengerBuild.MESSENGER_585 || build.is586()) {
+        if (build == MessengerBuild.MESSENGER_585 || build.is586() || build == MessengerBuild.MESSENGER_588) {
+            if (build == MessengerBuild.MESSENGER_588) {
+                try { installTombstoneRows588(); }
+                catch (ReflectiveOperationException | RuntimeException | LinkageError failure) { logFailure("tombstone rows", failure); }
+            }
             try { installEncryptedRows585(); }
             catch (ReflectiveOperationException | RuntimeException | LinkageError failure) { logFailure("585 encrypted rows", failure); }
             try { installRowModel585(); }
@@ -104,6 +108,43 @@ final class MessengerMessageBorders {
             installRowMount();
         }
         XposedBridge.log("FacebookGoodies: Messenger message status hooks=" + installedHooks);
+    }
+
+    private void installTombstoneRows588() throws ReflectiveOperationException {
+        Class<?> type = Class.forName("X.AlY", false, loader);
+        Class<?> ba5 = Class.forName("X.Ba5", false, loader);
+        Class<?> deleted = Class.forName("X.5P8", false, loader);
+        Class<?> messageType = Class.forName("X.HVp", false, loader);
+        Field threadField588 = type.getDeclaredField("A03");
+        threadField588.setAccessible(true);
+        Method getId588 = messageType.getMethod("getId");
+        Method getTime588 = messageType.getMethod("DIM");
+        Method outgoing588 = messageType.getMethod("DuN");
+        Method getMessage = ba5.getMethod("BTL");
+        Method target = null;
+        for (Method method : type.getDeclaredMethods())
+            if (method.getName().equals("Afu") && method.getParameterCount() == 6) target = method;
+        if (target == null) throw new NoSuchMethodException("tombstone decorator");
+        XposedBridge.hookMethod(target, new XC_MethodHook() {
+            @Override protected void afterHookedMethod(MethodHookParam param) {
+                try {
+                    Object message = getMessage.invoke(param.args[3]);
+                    if (deleted.isInstance(message)) {
+                        Object thread = threadField588.get(param.thisObject);
+                        String id = (String) getId588.invoke(message);
+                        long time = ((Number) getTime588.invoke(message)).longValue();
+                        boolean incoming = !((Boolean) outgoing588.invoke(message));
+                        if (thread != null && id != null && !id.isEmpty() && time > 0) {
+                            synchronized (rows) { rows.put(id, new Row(thread.toString(), time, incoming, false)); }
+                            rowIdByComponent.put(param.args[0], id);
+                            if (param.getResult() != null) rowIdByComponent.put(param.getResult(), id);
+                            refresh();
+                        }
+                    }
+                } catch (ReflectiveOperationException | RuntimeException failure) { logFailure("tombstone row", failure); }
+            }
+        });
+        installedHooks++;
     }
 
     private void installEncryptedRows585() throws ReflectiveOperationException {
@@ -177,7 +218,8 @@ final class MessengerMessageBorders {
             @Override protected void beforeHookedMethod(MethodHookParam param) {
                 try {
                     Object view = cleanupView.get(param.thisObject);
-                    if (cleanupKind.getInt(param.thisObject) == (build.is586() ? 123 : 97)
+                    int cleanupAction = build == MessengerBuild.MESSENGER_588 ? 122 : build.is586() ? 123 : 97;
+                    if (cleanupKind.getInt(param.thisObject) == cleanupAction
                             && view instanceof View) unbind((View) view);
                 } catch (ReflectiveOperationException | RuntimeException failure) {
                     logFailure("585 encrypted row cleanup", failure);
@@ -218,6 +260,7 @@ final class MessengerMessageBorders {
         AtomicInteger rowEventLogs = new AtomicInteger();
         // 586 builds rows from the Litho event payload inside the row item's constructor;
         // the 585 section dispatch method is not invoked directly on this build.
+        // 588 dispatches the row event through BQ2.A0R; its 2cv builder does not carry the event.
         boolean operationDispatch = build.is586();
         Class<?> rowItem = operationDispatch ? hostType("X.2Qp") : null;
         final Field operationArgs = operationDispatch ? field(sectionOperation, "A03") : null;

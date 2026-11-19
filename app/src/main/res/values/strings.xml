@@ -7,6 +7,7 @@
     <string name="installed_version">Installed version %1$s</string>
     <string name="host_not_installed">App not installed</string>
     <string name="supported">Supported</string>
+    <string name="testing_required">Testing required</string>
     <string name="unsupported">Unsupported</string>
     <string name="support_unavailable">Unavailable</string>
     <string name="no_count">—</string>
@@ -56,7 +57,7 @@
     <string name="messenger_local_read">Mark chats read locally</string>
     <string name="messenger_local_read_description">Update the chat list without sending a read receipt. Restart Messenger after changing.</string>
     <string name="messenger_markers">Show message status icons</string>
-    <string name="messenger_markers_description">Show pending-read and confirmed-unsend icons beside messages.</string>
+    <string name="messenger_markers_description">Show the pending-read icon beside messages, including unsent messages.</string>
     <string name="messenger_typing">Hide typing status</string>
     <string name="messenger_typing_description">Prevent Messenger from sending typing activity.</string>
     <string name="messenger_story_seen">Hide story views</string>

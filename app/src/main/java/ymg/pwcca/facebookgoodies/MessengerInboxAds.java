@@ -9,11 +9,11 @@ import java.util.function.BooleanSupplier;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 
-/** Drops sponsored thread rows from the Messenger inbox before items are built. */
+/** Drops sponsored thread rows from the Messenger inbox. */
 final class MessengerInboxAds {
     private MessengerInboxAds() { }
 
-    static int install(ClassLoader loader, BooleanSupplier enabled, AtomicInteger removed)
+    static int install(ClassLoader loader, MessengerBuild build, BooleanSupplier enabled, AtomicInteger removed)
             throws ReflectiveOperationException {
         Class<?> supplier = Class.forName(
                 "com.facebook.messaging.msys.threadlist.plugins.core.itemsupplier.ThreadListItemSupplierImplementation",
@@ -21,14 +21,6 @@ final class MessengerInboxAds {
         Class<?> immutableList = Class.forName("com.google.common.collect.ImmutableList", false, loader);
         Class<?> summary = Class.forName("com.facebook.messaging.model.threads.ThreadSummary", false, loader);
         Class<?> adContext = Class.forName("com.facebook.messaging.model.threads.ads.AdContextData", false, loader);
-
-        Field rows = null;
-        for (Field field : supplier.getDeclaredFields()) {
-            if (field.getType() != immutableList) continue;
-            if (rows != null) throw new NoSuchFieldException("Messenger inbox row list is ambiguous");
-            rows = field;
-        }
-        if (rows == null) throw new NoSuchFieldException("Messenger inbox row list not found");
 
         Method items = null;
         for (Method method : supplier.getDeclaredMethods()) {
@@ -46,9 +38,20 @@ final class MessengerInboxAds {
         }
         if (ad == null) throw new NoSuchFieldException("Messenger ad context field not found");
 
-        rows.setAccessible(true);
         ad.setAccessible(true);
         Method copyOf = immutableList.getMethod("copyOf", Iterable.class);
+        if (build == MessengerBuild.MESSENGER_588) {
+            installRenderedRows(loader, summary, items, ad, copyOf, enabled, removed);
+            return 1;
+        }
+        Field rows = null;
+        for (Field field : supplier.getDeclaredFields()) {
+            if (field.getType() != immutableList) continue;
+            if (rows != null) throw new NoSuchFieldException("Messenger inbox row list is ambiguous");
+            rows = field;
+        }
+        if (rows == null) throw new NoSuchFieldException("Messenger inbox row list not found");
+        rows.setAccessible(true);
         Field rowField = rows;
         Field adField = ad;
 
@@ -79,5 +82,42 @@ final class MessengerInboxAds {
             }
         });
         return 1;
+    }
+
+    private static void installRenderedRows(ClassLoader loader, Class<?> summaryType, Method items,
+                                            Field adField, Method copyOf, BooleanSupplier enabled,
+                                            AtomicInteger removed) throws ReflectiveOperationException {
+        Field threadSummary = Class.forName("X.2Cr", false, loader).getDeclaredField("A03");
+        Field folderSummary = Class.forName("X.35F", false, loader).getDeclaredField("A04");
+        if (threadSummary.getType() != summaryType || folderSummary.getType() != summaryType)
+            throw new NoSuchFieldException("Messenger inbox item summary type changed");
+        threadSummary.setAccessible(true);
+        folderSummary.setAccessible(true);
+        Class<?> threadRow = threadSummary.getDeclaringClass();
+        Class<?> folderRow = folderSummary.getDeclaringClass();
+
+        // The 588 supplier also uses its input list for pagination and profile prefetch.
+        XposedBridge.hookMethod(items, new XC_MethodHook() {
+            @Override protected void afterHookedMethod(MethodHookParam param) {
+                if (!enabled.getAsBoolean() || !(param.getResult() instanceof List<?>)) return;
+                List<?> original = (List<?>) param.getResult();
+                List<Object> kept = new ArrayList<>(original.size());
+                try {
+                    for (Object row : original) {
+                        Object summary = null;
+                        if (threadRow.isInstance(row)) summary = threadSummary.get(row);
+                        else if (folderRow.isInstance(row)) summary = folderSummary.get(row);
+                        if (summary == null || adField.get(summary) == null) kept.add(row);
+                    }
+                    int dropped = original.size() - kept.size();
+                    if (dropped == 0) return;
+                    param.setResult(copyOf.invoke(null, kept));
+                    removed.addAndGet(dropped);
+                } catch (ReflectiveOperationException | RuntimeException failure) {
+                    XposedBridge.log("FacebookGoodies: Messenger inbox ad filter failed: "
+                            + failure.getClass().getSimpleName());
+                }
+            }
+        });
     }
 }
