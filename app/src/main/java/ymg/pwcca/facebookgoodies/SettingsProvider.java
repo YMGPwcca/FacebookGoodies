@@ -8,6 +8,9 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Process;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 public final class SettingsProvider extends ContentProvider {
@@ -31,7 +34,19 @@ public final class SettingsProvider extends ContentProvider {
         if ("report".equals(method)) return acceptReport(uid, extras);
         if ("config".equals(method)) return configuration();
         if ("status".equals(method)) return status("messenger".equals(arg));
+        if ("mp4-mapping".equals(method)) return mp4Mapping();
         throw new IllegalArgumentException("Unknown operation");
+    }
+    private Bundle mp4Mapping() {
+        Bundle out = new Bundle();
+        try (InputStream input = getContext().getAssets().open("mp4-box-map.properties");
+             ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int count;
+            while ((count = input.read(buffer)) != -1) bytes.write(buffer, 0, count);
+            out.putByteArray("mapping", bytes.toByteArray());
+        } catch (IOException ignored) { }
+        return out;
     }
     private Bundle configuration() {
         SharedPreferences prefs = getContext().getSharedPreferences(PREFS, 0);

@@ -1,5 +1,8 @@
 package ymg.pwcca.facebookgoodies;
 
+import android.content.Context;
+import android.os.Bundle;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,9 +27,12 @@ final class PortableMp4Muxer {
         mux(video,audio,output,plan,transfer,new HostState());
     }
     static void mux(File video, File audio, File output, DownloadPlan plan, DownloadTransfer transfer, HostState state) throws IOException {
+        mux(video, audio, output, plan, transfer, state, null);
+    }
+    static void mux(File video, File audio, File output, DownloadPlan plan, DownloadTransfer transfer, HostState state, Context context) throws IOException {
         List<Track> opened = new ArrayList<>();
         try {
-            state.portableError.set(0); state.portableStage.set(70); ensureMapping();
+            state.portableError.set(0); state.portableStage.set(70); ensureMapping(context);
             state.portableStage.set(71);
             transfer.check();
             Movie input = MovieCreator.build(video.getAbsolutePath()); opened.addAll(input.getTracks());
@@ -59,10 +65,23 @@ final class PortableMp4Muxer {
         validate(soundtrack,null);merged.addTrack(soundtrack);
     }
     static synchronized void ensureMapping() throws IOException {
+        ensureMapping(null);
+    }
+    static synchronized void ensureMapping(Context context) throws IOException {
         if (PropertyBoxParserImpl.BOX_MAP_CACHE != null) return;
-        ClassLoader loader = PortableMp4Muxer.class.getClassLoader();
-        InputStream input = loader.getResourceAsStream("assets/mp4-box-map.properties");
-        if (input == null) input = loader.getResourceAsStream("isoparser2-default.properties");
+        InputStream input = null;
+        if (context != null) {
+            try {
+                Bundle response = context.getContentResolver().call(SettingsProvider.URI, "mp4-mapping", null, null);
+                byte[] bytes = response == null ? null : response.getByteArray("mapping");
+                if (bytes != null) input = new ByteArrayInputStream(bytes);
+            } catch (RuntimeException ignored) { }
+        }
+        if (input == null) {
+            ClassLoader loader = PortableMp4Muxer.class.getClassLoader();
+            input = loader.getResourceAsStream("assets/mp4-box-map.properties");
+            if (input == null) input = loader.getResourceAsStream("isoparser2-default.properties");
+        }
         if (input == null) throw new DownloadFailure("The module's MP4 format mapping is unavailable");
         Properties mapping = new Properties();
         try (InputStream resource = input) { mapping.load(resource); }

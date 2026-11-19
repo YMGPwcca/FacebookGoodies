@@ -4,6 +4,7 @@ import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
+import android.content.Context;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -16,10 +17,13 @@ final class DownloadMuxer {
         mux(video, audio, output, plan, transfer, new HostState());
     }
     static void mux(File video, File audio, File output, DownloadPlan plan, DownloadTransfer transfer, HostState state) throws IOException {
+        mux(video, audio, output, plan, transfer, state, null);
+    }
+    static void mux(File video, File audio, File output, DownloadPlan plan, DownloadTransfer transfer, HostState state, Context context) throws IOException {
         try { nativeMux(video, audio, output, plan, transfer, state); }
         catch (DownloadFailure failed) {
             if (state.videoCodec.get() != 4 || state.muxStage.get() != 24) throw failed;
-            state.muxStage.set(7); PortableMp4Muxer.mux(video, audio, output, plan, transfer, state);
+            state.muxStage.set(7); PortableMp4Muxer.mux(video, audio, output, plan, transfer, state, context);
             state.muxStage.set(8); state.muxError.set(0);
         }
     }

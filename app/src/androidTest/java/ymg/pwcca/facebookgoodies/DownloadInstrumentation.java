@@ -17,15 +17,57 @@ import java.util.Collections;
 
 /** Platform-only tests: no new test runtime or network dependencies. */
 public final class DownloadInstrumentation extends Instrumentation {
-    @Override public void onCreate(Bundle arguments) { super.onCreate(arguments); start(); }
+    private boolean mappingOnly;
+    @Override public void onCreate(Bundle arguments) {
+        super.onCreate(arguments);
+        mappingOnly = "true".equals(arguments.getString("mappingOnly"));
+        start();
+    }
     @Override public void onStart() {
         Bundle result = new Bundle();
         try {
-            runChecks(); result.putString("stream", "PASS: DASH parse, lossless 1080p mux with audio, silent video, cancellation, atomic storage cleanup\n");
+            if (mappingOnly) {
+                verifyProviderVp9();
+                result.putString("stream", "PASS: provider mapping and lossless VP9/AAC merge\n");
+            } else {
+                runChecks();
+                result.putString("stream", "PASS: DASH parse, lossless 1080p mux with audio, silent video, cancellation, atomic storage cleanup\n");
+            }
             finish(ActivityResult.OK, result);
         } catch (Throwable failure) {
             result.putString("stream", "FAIL: " + failure.getClass().getSimpleName() + ": " + failure.getMessage() + "\n");
             finish(ActivityResult.FAILED, result);
+        }
+    }
+    private void verifyProviderVp9() throws Exception {
+        Context app = getTargetContext();
+        Bundle response = app.getContentResolver().call(SettingsProvider.URI, "mp4-mapping", null, null);
+        byte[] mapping = response == null ? null : response.getByteArray("mapping");
+        require(mapping != null && mapping.length > 1000, "Provider mapping missing");
+        File video = File.createTempFile("vp9-test-", ".mp4", app.getCacheDir());
+        File audio = File.createTempFile("aac-test-", ".m4a", app.getCacheDir());
+        File output = File.createTempFile("mux-test-", ".mp4", app.getCacheDir());
+        try {
+            copyAsset("vp9-unfragmented.mp4", video);
+            copyAsset("audio.m4a", audio);
+            DownloadPlan.Track track = new DownloadPlan.Track(Collections.emptyList(), 720, 1280, 100000);
+            org.mp4parser.PropertyBoxParserImpl.BOX_MAP_CACHE = null;
+            PortableMp4Muxer.mux(video, audio, output, new DownloadPlan(track, null, true),
+                    new DownloadTransfer(), new HostState(), app);
+            require(samples(video, "video/").equals(samples(output, "video/")), "VP9 samples changed");
+            require(samples(audio, "audio/").equals(samples(output, "audio/")), "AAC samples changed");
+            copyAsset("vp9.mp4", video);
+            PortableMp4Muxer.mux(video, audio, output, new DownloadPlan(track, null, true),
+                    new DownloadTransfer(), new HostState(), app);
+            require(samples(video, "video/").equals(samples(output, "video/")), "Fragmented VP9 samples changed");
+            require(samples(audio, "audio/").equals(samples(output, "audio/")), "Fragmented VP9 audio changed");
+        } finally { video.delete(); audio.delete(); output.delete(); }
+    }
+    private void copyAsset(String name, File file) throws Exception {
+        try (InputStream in = getContext().getAssets().open(name); FileOutputStream out = new FileOutputStream(file)) {
+            byte[] bytes = new byte[65536];
+            int count;
+            while ((count = in.read(bytes)) != -1) out.write(bytes, 0, count);
         }
     }
     private void runChecks() throws Exception {

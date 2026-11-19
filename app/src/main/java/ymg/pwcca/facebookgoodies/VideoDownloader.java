@@ -77,7 +77,7 @@ final class VideoDownloader {
         downloadTracks(task,plan,video,audio,progress);
         task.check();progress.begin(DownloadProgress.Stage.MERGE,"Reading and combining media tracks…");
         File output=new File(directory,"complete.mp4");
-        state.downloadStage.set(5);DownloadMuxer.mux(video,audio,output,plan,task,state);
+        state.downloadStage.set(5);DownloadMuxer.mux(video,audio,output,plan,task,state,app);
         progress.complete(DownloadProgress.Stage.MERGE,"MP4 ready");
         progress.begin(DownloadProgress.Stage.SAVE,"Writing to Downloads/FacebookGoodies…");
         task.check();state.downloadStage.set(6);DownloadStorage.publish(app,output,task);
