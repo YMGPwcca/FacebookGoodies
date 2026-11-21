@@ -33,8 +33,9 @@ The following exact builds include bindings for the existing controls and displa
 | Facebook | 587.0.0.39.55 | 707414483 |
 | Facebook | 588.0.0.42.55 | 707615136 |
 | Messenger | 588.0.0.20.98 | 347610371 |
+| Messenger | 588.1.0.66.98 | 347617585 |
 
-The bindings were checked against the APKs pulled from the device. Android reflection and no-op Xposed registration checks covered selected declarations and hook installers. The sections below record the live coverage for both 588 builds.
+The bindings were checked against the APKs pulled from the device. Android reflection and no-op Xposed registration checks covered selected declarations and hook installers. The sections below record the live coverage for the 588 builds.
 
 ## Feature targeting
 
@@ -56,7 +57,11 @@ Facebook 588 uses updated bindings for News Feed filters, Stories, Threads promo
 - **Facebook in-app read receipts.** The callback passed a controlled test. The Messaging button opened standalone Messenger, so the in-app chat path was unavailable.
 - **Downloads outside Reels.** The live download trial covered the Reels sidebar.
 
-### Messenger 588
+### Messenger 588.1
+
+FacebookGoodies registered 37 hooks with zero reported errors on Messenger 588.1.0.66.98 (347617585). The port updates the conversation sheet and Emoji badge bindings, as well as the read, typing, Story, message status, inbox ads, and AI hooks. Live behavior checks are pending for this exact build.
+
+### Messenger 588.0
 
 **Observed live.** The per-chat read-receipt switch saved both states. Two-account trials on an earlier 1.5.1 build verified read and typing suppression, manual seen, the per-chat receipt override, local-read behavior on a fresh incoming message, Story-view suppression, and the pending-read eye on an unsent message. The new composer was checked separately and displayed the pending-seen badge on Emoji. The floating Meta AI button appeared and disappeared as its switch changed.
 

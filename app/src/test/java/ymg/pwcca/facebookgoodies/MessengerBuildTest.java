@@ -4,6 +4,12 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public final class MessengerBuildTest {
+    @Test public void identifiesOnlyTheExact588MaintenanceBuild() {
+        assertEquals(MessengerBuild.MESSENGER_588_1, MessengerBuild.identify("588.1.0.66.98", 347617585L));
+        assertEquals(MessengerBuild.UNSUPPORTED, MessengerBuild.identify("588.1.0.66.98", 347617584L));
+        assertEquals(MessengerBuild.UNSUPPORTED, MessengerBuild.identify("588.0.0.20.98", 347617585L));
+    }
+
     @Test public void identifiesExactSupportedBuilds() {
         assertEquals(MessengerBuild.MESSENGER_584_1,
                 MessengerBuild.identify("584.1.0.61.98", 346817021L));

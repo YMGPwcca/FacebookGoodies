@@ -40,6 +40,8 @@ import de.robv.android.xposed.XposedBridge;
 final class MessengerReadControls {
     private static final int CLOSE_EMOJI_588 = 0x7f144c18;
     private static final int OPEN_EMOJI_588 = 0x7f144c19;
+    private static final int CLOSE_EMOJI_588_1 = 0x7f144c19;
+    private static final int OPEN_EMOJI_588_1 = 0x7f144c1a;
     private final Context app;
     private final ClassLoader loader;
     private final BooleanSupplier enabled;
@@ -184,7 +186,7 @@ final class MessengerReadControls {
         catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
             logFailure("thread converter", failure);
         }
-        if (build == MessengerBuild.MESSENGER_585 || build.is586() || build == MessengerBuild.MESSENGER_588) {
+        if (build == MessengerBuild.MESSENGER_585 || build.is586() || build.is588()) {
             try { installLiveRead585(); }
             catch (ReflectiveOperationException | RuntimeException | LinkageError failure) {
                 logFailure("live read hook", failure);
@@ -208,7 +210,7 @@ final class MessengerReadControls {
                         String thread = key.toString();
                         liveSummaries.put(thread, new WeakReference<>(param.thisObject));
                         observeInitialRead(thread, summaryReadTime.getLong(param.thisObject));
-                        if ((build == MessengerBuild.MESSENGER_585 || build.is586() || build == MessengerBuild.MESSENGER_588)
+                        if ((build == MessengerBuild.MESSENGER_585 || build.is586() || build.is588())
                                 && thread.startsWith("ADVANCED_CRYPTO_"))
                             observeSyncedRead(thread, summaryReadTime.getLong(param.thisObject), false);
                         long lastMessage = summaryLastMessage.getLong(param.thisObject);
@@ -229,7 +231,7 @@ final class MessengerReadControls {
                 ? "X.7gJ" : MessengerHostBindings.typeName(build, "X.4lW"), false, loader);
         Method convert = converter.getDeclaredMethod(
                 build == MessengerBuild.MESSENGER_584_1 ? "A01"
-                        : build == MessengerBuild.MESSENGER_588 ? "A03" : "A02", threadKey);
+                        : build.is588() ? "A03" : "A02", threadKey);
         threadConverter = convert;
         XposedBridge.hookMethod(convert, new XC_MethodHook() {
             @Override protected void afterHookedMethod(MethodHookParam param) {
@@ -467,7 +469,7 @@ final class MessengerReadControls {
             XposedBridge.log("FacebookGoodies: Messenger chat scan awaiting composer");
         if (composer) {
             String thread = visibleThread.apply(root);
-            if (build == MessengerBuild.MESSENGER_588 && thread != null) {
+            if (build.is588() && thread != null) {
                 Long lastMessage = lastMessageByThread.get(thread);
                 if (lastMessage != null && lastMessage > 0) rememberLocalRead(thread, lastMessage);
             }
@@ -530,7 +532,7 @@ final class MessengerReadControls {
         if (editor == null || !(editor.getParent() instanceof ViewGroup)) return null;
         ViewGroup host = (ViewGroup) editor.getParent();
         if (!"com.facebook.litho.ComponentHost".equals(host.getClass().getName())) return null;
-        if (build == MessengerBuild.MESSENGER_588) return findEmoji588(host);
+        if (build.is588()) return findEmoji588(host);
         int tolerance = dp(editor.getContext(), 2);
         View closest = null;
         int closestGap = Integer.MAX_VALUE;
@@ -553,8 +555,9 @@ final class MessengerReadControls {
         String open;
         String close;
         try {
-            open = resources.getString(OPEN_EMOJI_588);
-            close = resources.getString(CLOSE_EMOJI_588);
+            boolean rebuild = build == MessengerBuild.MESSENGER_588_1;
+            open = resources.getString(rebuild ? OPEN_EMOJI_588_1 : OPEN_EMOJI_588);
+            close = resources.getString(rebuild ? CLOSE_EMOJI_588_1 : CLOSE_EMOJI_588);
         } catch (Resources.NotFoundException missing) {
             return null;
         }

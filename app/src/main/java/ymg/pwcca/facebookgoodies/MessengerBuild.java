@@ -1,7 +1,7 @@
 package ymg.pwcca.facebookgoodies;
 
 enum MessengerBuild {
-    MESSENGER_584_1, MESSENGER_585, MESSENGER_586, MESSENGER_586_REBUILD, MESSENGER_588, UNSUPPORTED;
+    MESSENGER_584_1, MESSENGER_585, MESSENGER_586, MESSENGER_586_REBUILD, MESSENGER_588, MESSENGER_588_1, UNSUPPORTED;
 
     static MessengerBuild identify(String versionName, long versionCode) {
         if ("584.1.0.61.98".equals(versionName) && versionCode == 346817021L)
@@ -14,9 +14,12 @@ enum MessengerBuild {
             return MESSENGER_586_REBUILD;
         if ("588.0.0.20.98".equals(versionName) && versionCode == 347610371L)
             return MESSENGER_588;
+        if ("588.1.0.66.98".equals(versionName) && versionCode == 347617585L)
+            return MESSENGER_588_1;
         return UNSUPPORTED;
     }
 
     boolean is586() { return this == MESSENGER_586 || this == MESSENGER_586_REBUILD; }
+    boolean is588() { return this == MESSENGER_588 || this == MESSENGER_588_1; }
 
 }

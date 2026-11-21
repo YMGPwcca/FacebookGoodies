@@ -40,8 +40,8 @@ final class MessengerInboxAds {
 
         ad.setAccessible(true);
         Method copyOf = immutableList.getMethod("copyOf", Iterable.class);
-        if (build == MessengerBuild.MESSENGER_588) {
-            installRenderedRows(loader, summary, items, ad, copyOf, enabled, removed);
+        if (build.is588()) {
+            installRenderedRows(loader, build, summary, items, ad, copyOf, enabled, removed);
             return 1;
         }
         Field rows = null;
@@ -84,17 +84,17 @@ final class MessengerInboxAds {
         return 1;
     }
 
-    private static void installRenderedRows(ClassLoader loader, Class<?> summaryType, Method items,
+    private static void installRenderedRows(ClassLoader loader, MessengerBuild build, Class<?> summaryType, Method items,
                                             Field adField, Method copyOf, BooleanSupplier enabled,
                                             AtomicInteger removed) throws ReflectiveOperationException {
-        Field threadSummary = Class.forName("X.2Cr", false, loader).getDeclaredField("A03");
-        Field folderSummary = Class.forName("X.35F", false, loader).getDeclaredField("A04");
+        Class<?> threadRow = Class.forName(MessengerHostBindings.type588(build, "X.2Cr"), false, loader);
+        Class<?> folderRow = Class.forName(MessengerHostBindings.type588(build, "X.35F"), false, loader);
+        Field threadSummary = threadRow.getDeclaredField("A03");
+        Field folderSummary = folderRow.getDeclaredField("A04");
         if (threadSummary.getType() != summaryType || folderSummary.getType() != summaryType)
             throw new NoSuchFieldException("Messenger inbox item summary type changed");
         threadSummary.setAccessible(true);
         folderSummary.setAccessible(true);
-        Class<?> threadRow = threadSummary.getDeclaringClass();
-        Class<?> folderRow = folderSummary.getDeclaringClass();
 
         // The 588 supplier also uses its input list for pagination and profile prefetch.
         XposedBridge.hookMethod(items, new XC_MethodHook() {

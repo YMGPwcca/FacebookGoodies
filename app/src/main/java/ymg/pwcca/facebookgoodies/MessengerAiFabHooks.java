@@ -11,10 +11,10 @@ final class MessengerAiFabHooks {
         String componentName;
         String contextName;
         String resultName;
-        if (build == MessengerBuild.MESSENGER_588) {
-            componentName = "X.6rC";
-            contextName = "X.28I";
-            resultName = "X.1Fd";
+        if (build.is588()) {
+            componentName = MessengerHostBindings.type588(build, "X.6rC");
+            contextName = MessengerHostBindings.type588(build, "X.28I");
+            resultName = MessengerHostBindings.type588(build, "X.1Fd");
         } else if (build == MessengerBuild.MESSENGER_585 || build.is586()) {
             componentName = MessengerHostBindings.typeName(build, "X.75Q");
             contextName = MessengerHostBindings.typeName(build, "X.2ED");

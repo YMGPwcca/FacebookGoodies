@@ -193,61 +193,18 @@ final class MessengerChatMenu {
             if (fields.length != 1) throw new NoSuchFieldException("bottom sheet builder field changed");
             Field builder = fields[0];
             builder.setAccessible(true);
-            Method render = null;
-            for (Method method : sheet.getDeclaredMethods()) {
-                if (method.getParameterCount() != 1 || method.getReturnType() == void.class
-                        || method.getReturnType() == boolean.class) continue;
-                if (render != null) throw new NoSuchMethodException("bottom sheet render is ambiguous");
-                render = method;
-            }
-            if (render == null) throw new NoSuchMethodException("bottom sheet render not found");
+            Method render = bottomRenderer(sheet);
             final Field builderField = builder;
             sheetBuilder = builder;
             XposedBridge.hookMethod(render, new XC_MethodHook() {
                 @Override protected void beforeHookedMethod(MethodHookParam param) {
-                    if (!hidden.getAsBoolean()) return;
-                    try {
-                        Object value = builderField.get(param.thisObject);
-                        if (value == null) return;
-                        BottomShape shape = bottom(value);
-                        Object summary = shape.summary.get(value);
-                        if (summary == null) return;
-                        String thread = readControls.threadKeyOf(summary);
-                        if (thread == null) return;
-                        Object current = shape.items.get(value);
-                        if (!(current instanceof List<?>)) return;
-                        List<?> list = (List<?>) current;
-                        List<Object> kept = new ArrayList<>(list.size());
-                        Object template = null;
-                        for (Object item : list) {
-                            if (shape.idOf(item) == RECEIPT_ITEM_ID) continue;
-                            if (template == null) template = item;
-                            kept.add(item);
-                        }
-                        if (template == null) return;
-                        Object item = shape.clone(template, titleFor(thread));
-                        kept.add(item);
-                        shape.items.set(value, shape.copyOf.invoke(null, kept));
-                        Object callback = shape.callback.get(value);
-                        if (callback != null) {
-                            sheetThreads.put(callback, thread);
-                            sheetFragments.put(callback, param.thisObject);
-                            hookCallback(callback.getClass(), shape.itemType);
-                        }
-                        shown.incrementAndGet();
-                        if (shown.get() <= 6)
-                            XposedBridge.log("FacebookGoodies: Messenger bottom receipt item shown state="
-                                    + readControls.receiptsAllowedFor(thread));
-                    } catch (ReflectiveOperationException | RuntimeException failure) {
-                        errors.incrementAndGet();
-                        XposedBridge.log("FacebookGoodies: Messenger bottom menu item failed: "
-                                + failure.getClass().getSimpleName());
-                    }
+                    if (!sheet.isInstance(param.thisObject) || !hidden.getAsBoolean()) return;
+                    injectBottomItem(param.thisObject, builderField);
                 }
 
                 @Override protected void afterHookedMethod(MethodHookParam param) {
                     Object result = param.getResult();
-                    if (result != null) sheetComponents.put(param.thisObject, result);
+                    if (result != null && sheet.isInstance(param.thisObject)) sheetComponents.put(param.thisObject, result);
                 }
             });
             XposedBridge.log("FacebookGoodies: Messenger bottom menu hook installed");
@@ -256,7 +213,62 @@ final class MessengerChatMenu {
             errors.incrementAndGet();
             XposedBridge.log("FacebookGoodies: Messenger bottom menu unavailable: "
                     + failure.getClass().getSimpleName());
-            return 0;
+        }
+        return 0;
+    }
+
+    private Method bottomRenderer(Class<?> sheet) throws ReflectiveOperationException {
+        if (build == MessengerBuild.MESSENGER_588_1) {
+            return sheet.getSuperclass().getDeclaredMethod("A23", Class.forName("X.1PS", false, loader));
+        }
+        Method render = null;
+        for (Method method : sheet.getDeclaredMethods()) {
+            if (method.getParameterCount() != 1 || method.getReturnType() == void.class
+                    || method.getReturnType() == boolean.class) continue;
+            if (render != null) throw new NoSuchMethodException("bottom sheet render is ambiguous");
+            render = method;
+        }
+        if (render == null) throw new NoSuchMethodException("bottom sheet render not found");
+        return render;
+    }
+
+    private void injectBottomItem(Object fragment, Field builderField) {
+        try {
+            Object value = builderField.get(fragment);
+            if (value == null) return;
+            BottomShape shape = bottom(value);
+            Object summary = shape.summary.get(value);
+            if (summary == null) return;
+            String thread = readControls.threadKeyOf(summary);
+            if (thread == null) return;
+            Object current = shape.items.get(value);
+            if (!(current instanceof List<?>)) return;
+            List<?> list = (List<?>) current;
+            List<Object> kept = new ArrayList<>(list.size());
+            Object template = null;
+            for (Object item : list) {
+                if (shape.idOf(item) == RECEIPT_ITEM_ID) continue;
+                if (template == null) template = item;
+                kept.add(item);
+            }
+            if (template == null) return;
+            Object item = shape.clone(template, titleFor(thread));
+            kept.add(item);
+            shape.items.set(value, shape.copyOf.invoke(null, kept));
+            Object callback = shape.callback.get(value);
+            if (callback != null) {
+                sheetThreads.put(callback, thread);
+                sheetFragments.put(callback, fragment);
+                hookCallback(callback.getClass(), shape.itemType);
+            }
+            shown.incrementAndGet();
+            if (shown.get() <= 6)
+                XposedBridge.log("FacebookGoodies: Messenger bottom receipt item shown state="
+                        + readControls.receiptsAllowedFor(thread));
+        } catch (ReflectiveOperationException | RuntimeException failure) {
+            errors.incrementAndGet();
+            XposedBridge.log("FacebookGoodies: Messenger bottom menu item failed: "
+                    + failure.getClass().getSimpleName());
         }
     }
 
@@ -277,7 +289,7 @@ final class MessengerChatMenu {
                         param.setResult(null);
                         toggle(thread);
                         Object fragment = sheetFragments.get(param.thisObject);
-                        if (build == MessengerBuild.MESSENGER_588 && fragment != null)
+                        if (build.is588() && fragment != null)
                             fragment.getClass().getMethod("A1N").invoke(fragment);
                         else
                             refreshSheet(fragment, thread);
@@ -503,8 +515,8 @@ final class MessengerChatMenu {
             constructor = candidate;
         }
         Class<?> proxyInterface = null;
-        if (constructor == null && build == MessengerBuild.MESSENGER_588) {
-            proxyInterface = Class.forName("X.HVf", false, loader);
+        if (constructor == null && build.is588()) {
+            proxyInterface = Class.forName(MessengerHostBindings.type588(build, "X.HVf"), false, loader);
             if (!proxyInterface.isAssignableFrom(itemType))
                 throw new NoSuchMethodException("bottom menu item interface not found");
         } else if (constructor == null) {
@@ -610,7 +622,8 @@ final class MessengerChatMenu {
                 return Proxy.newProxyInstance(proxyInterface.getClassLoader(), new Class<?>[]{proxyInterface},
                         (proxy, method, args) -> {
                             if ("getId".equals(method.getName())) return RECEIPT_ITEM_ID;
-                            if ("getTitle".equals(method.getName()) || "BVg".equals(method.getName())) return title;
+                            if ("getTitle".equals(method.getName()) || "BVg".equals(method.getName())
+                                    || "BVl".equals(method.getName())) return title;
                             if ("equals".equals(method.getName())) return proxy == args[0];
                             if ("hashCode".equals(method.getName())) return System.identityHashCode(proxy);
                             return method.invoke(template, args);

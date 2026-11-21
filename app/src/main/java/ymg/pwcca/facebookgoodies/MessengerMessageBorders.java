@@ -92,8 +92,8 @@ final class MessengerMessageBorders {
     int errorCount() { return errors.get(); }
 
     void install() {
-        if (build == MessengerBuild.MESSENGER_585 || build.is586() || build == MessengerBuild.MESSENGER_588) {
-            if (build == MessengerBuild.MESSENGER_588) {
+        if (build == MessengerBuild.MESSENGER_585 || build.is586() || build.is588()) {
+            if (build.is588()) {
                 try { installTombstoneRows588(); }
                 catch (ReflectiveOperationException | RuntimeException | LinkageError failure) { logFailure("tombstone rows", failure); }
             }
@@ -111,19 +111,20 @@ final class MessengerMessageBorders {
     }
 
     private void installTombstoneRows588() throws ReflectiveOperationException {
-        Class<?> type = Class.forName("X.AlY", false, loader);
-        Class<?> ba5 = Class.forName("X.Ba5", false, loader);
-        Class<?> deleted = Class.forName("X.5P8", false, loader);
-        Class<?> messageType = Class.forName("X.HVp", false, loader);
+        Class<?> type = Class.forName(MessengerHostBindings.type588(build, "X.AlY"), false, loader);
+        Class<?> ba5 = Class.forName(MessengerHostBindings.type588(build, "X.Ba5"), false, loader);
+        Class<?> deleted = hostType("X.5Qj");
+        Class<?> messageType = hostType("X.6mm");
         Field threadField588 = type.getDeclaredField("A03");
         threadField588.setAccessible(true);
         Method getId588 = messageType.getMethod("getId");
-        Method getTime588 = messageType.getMethod("DIM");
-        Method outgoing588 = messageType.getMethod("DuN");
-        Method getMessage = ba5.getMethod("BTL");
+        Method getTime588 = hostMethod(messageType, "Cha");
+        Method outgoing588 = hostMethod(messageType, "D9Z");
+        Method getMessage = hostMethod(ba5, "BTL");
+        String decorator = MessengerHostBindings.methodName(build, type.getName(), "Afu");
         Method target = null;
         for (Method method : type.getDeclaredMethods())
-            if (method.getName().equals("Afu") && method.getParameterCount() == 6) target = method;
+            if (method.getName().equals(decorator) && method.getParameterCount() == 6) target = method;
         if (target == null) throw new NoSuchMethodException("tombstone decorator");
         XposedBridge.hookMethod(target, new XC_MethodHook() {
             @Override protected void afterHookedMethod(MethodHookParam param) {
@@ -192,12 +193,13 @@ final class MessengerMessageBorders {
         Field actionWrapper = field(action, "A01");
         Field wrapperKey = field(wrapper, "A02");
         Field keyId = field(rowKey, "A00");
+        int mountAction = build == MessengerBuild.MESSENGER_588_1 ? 0 : 2;
         XposedBridge.hookMethod(hostMethod(binder, "AMG", mountContext, Object.class, Object.class), new XC_MethodHook() {
             @Override protected void afterHookedMethod(MethodHookParam param) {
                 try {
                     if (param.getThrowable() != null || !(param.args[1] instanceof View)) return;
                     Object callback = binderAction.get(param.thisObject);
-                    if (!action.isInstance(callback) || actionKind.getInt(callback) != 2) return;
+                    if (!action.isInstance(callback) || actionKind.getInt(callback) != mountAction) return;
                     Object row = actionWrapper.get(callback);
                     if (!wrapper.isInstance(row)) return;
                     Object key = wrapperKey.get(row);
@@ -214,11 +216,11 @@ final class MessengerMessageBorders {
         Class<?> cleanup = hostType("X.BST");
         Field cleanupKind = field(cleanup, "$t");
         Field cleanupView = field(cleanup, "A00");
+        int cleanupAction = build == MessengerBuild.MESSENGER_588_1 ? 91 : build.is588() ? 122 : build.is586() ? 123 : 97;
         XposedBridge.hookMethod(hostMethod(cleanup, "invoke"), new XC_MethodHook() {
             @Override protected void beforeHookedMethod(MethodHookParam param) {
                 try {
                     Object view = cleanupView.get(param.thisObject);
-                    int cleanupAction = build == MessengerBuild.MESSENGER_588 ? 122 : build.is586() ? 123 : 97;
                     if (cleanupKind.getInt(param.thisObject) == cleanupAction
                             && view instanceof View) unbind((View) view);
                 } catch (ReflectiveOperationException | RuntimeException failure) {
@@ -456,9 +458,14 @@ final class MessengerMessageBorders {
                         unmatchedMountLogs, mappedMountLogs);
             }
         };
-        XposedBridge.hookMethod(hostMethod(componentHost, "A0T", mountItem), mountHook);
-        installedHooks++;
-        XposedBridge.hookMethod(hostMethod(componentHost, "A0U", mountItem, int.class), mountHook);
+        if (build != MessengerBuild.MESSENGER_588_1) {
+            XposedBridge.hookMethod(hostMethod(componentHost, "A0T", mountItem), mountHook);
+            installedHooks++;
+        }
+        Method indexedMount = build == MessengerBuild.MESSENGER_588_1
+                ? componentHost.getDeclaredMethod("A0U", mountItem, int.class)
+                : hostMethod(componentHost, "A0U", mountItem, int.class);
+        XposedBridge.hookMethod(indexedMount, mountHook);
         installedHooks++;
         XposedBridge.log("FacebookGoodies: Messenger 585 row mount hooks installed");
         try {

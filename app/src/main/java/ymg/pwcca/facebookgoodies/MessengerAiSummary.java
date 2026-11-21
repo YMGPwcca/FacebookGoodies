@@ -32,15 +32,16 @@ final class MessengerAiSummary {
         if (show == null) throw new NoSuchMethodException("AI summary pill method not found");
         XposedBridge.hookMethod(show, skip);
 
-        if (build == MessengerBuild.MESSENGER_588) {
-            Class<?> lambda = Class.forName("X.FYO", false, loader);
-            Class<?> controller = Class.forName("X.59h", false, loader);
+        if (build.is588()) {
+            Class<?> lambda = Class.forName(MessengerHostBindings.type588(build, "X.FYO"), false, loader);
+            Class<?> controller = Class.forName(MessengerHostBindings.type588(build, "X.59h"), false, loader);
+            int summaryAction = build == MessengerBuild.MESSENGER_588_1 ? 56 : 5;
             Field kind = lambda.getDeclaredField("$t");
             kind.setAccessible(true);
             Object unit = Class.forName("kotlin.Unit", false, loader).getField("INSTANCE").get(null);
             XposedBridge.hookMethod(lambda.getDeclaredMethod("invoke", Object.class), new XC_MethodHook() {
                 @Override protected void beforeHookedMethod(MethodHookParam param) throws IllegalAccessException {
-                    if (enabled.getAsBoolean() && kind.getInt(param.thisObject) == 5
+                    if (enabled.getAsBoolean() && kind.getInt(param.thisObject) == summaryAction
                             && controller.isInstance(param.args[0])) {
                         param.setResult(unit);
                         hidden.incrementAndGet();

@@ -125,11 +125,61 @@ final class MessengerHostBindings {
         if (!baseName.startsWith("X.")) return baseName;
         Map<String, String> table = build == MessengerBuild.MESSENGER_586 ? RELEASE_586
                 : build == MessengerBuild.MESSENGER_586_REBUILD ? REBUILD_586
-                : build == MessengerBuild.MESSENGER_588 ? RELEASE_588 : null;
+                : build.is588() ? RELEASE_588 : null;
         if (table == null) return baseName;
         String mapped = table.get(baseName);
         if (mapped == null) throw new ClassNotFoundException("Unmapped Messenger type: " + baseName);
-        return mapped;
+        return build.is588() ? type588(build, mapped) : mapped;
+    }
+
+    /** Resolves verified 588 base-build types on the 588.1 build. */
+    static String type588(MessengerBuild build, String name) throws ClassNotFoundException {
+        if (build != MessengerBuild.MESSENGER_588_1) return name;
+        return switch (name) {
+            case "X.4k4" -> "X.4ro";
+            case "X.A0I" -> "X.Atx";
+            case "X.BSa" -> "X.BoE";
+            case "X.BSk" -> "X.Btr";
+            case "X.4yu" -> "X.4rE";
+            case "X.4RX" -> "X.4Sw";
+            case "X.AaM" -> "X.ApL";
+            case "X.28I" -> "X.2Gk";
+            case "X.5Ms" -> "X.5Zo";
+            case "X.HVp" -> "X.6Bf";
+            case "X.5P8" -> "X.4qe";
+            case "X.Acg" -> "X.Arn";
+            case "X.1JV" -> "X.1RF";
+            case "X.Fca" -> "X.Fvn";
+            case "X.Ace" -> "X.Arl";
+            case "X.Acd" -> "X.Ark";
+            case "X.BaH" -> "X.BxD";
+            case "X.BQ2" -> "X.BlC";
+            case "X.4zX" -> "X.5nA";
+            case "X.2dB" -> "X.2lE";
+            case "X.BQ3" -> "X.BlD";
+            case "X.BPY" -> "X.Bkg";
+            case "X.2cv" -> "X.2ks";
+            case "X.FYI" -> "X.4w8";
+            case "X.22A" -> "X.2Ae";
+            case "X.7Jx" -> "X.7eX";
+            case "X.2PN" -> "X.2az";
+            case "X.1Hi" -> "X.1OW";
+            case "X.6rC" -> "X.7HG";
+            case "X.1Fd" -> "X.1Jx";
+            case "X.FYO" -> "X.Bwq";
+            case "X.59h" -> "X.5Ub";
+            case "X.Cno" -> "X.Hqr";
+            case "X.3gn" -> "X.3jo";
+            case "X.6S3" -> "X.BD7";
+            case "X.SSw" -> "X.PiT";
+            case "X.SJL" -> "X.Paj";
+            case "X.AlY" -> "X.Ayy";
+            case "X.Ba5" -> "X.BFb";
+            case "X.HVf" -> "X.Ho4";
+            case "X.2Cr" -> "X.2Pc";
+            case "X.35F" -> "X.382";
+            default -> throw new ClassNotFoundException("Unmapped Messenger 588.1 type: " + name);
+        };
     }
 
     /** Thread list menu controller; 584 keeps a distinct base name. */
@@ -140,6 +190,7 @@ final class MessengerHostBindings {
 
     /** In-thread AI summary floating pill handler. */
     static String summaryPillHandler(MessengerBuild build) {
+        if (build == MessengerBuild.MESSENGER_588_1) return "X.AsJ";
         if (build == MessengerBuild.MESSENGER_588) return "X.AYC";
         if (build == MessengerBuild.MESSENGER_584_1) return "X.9XY";
         if (build == MessengerBuild.MESSENGER_585) return "X.Ado";
@@ -161,10 +212,27 @@ final class MessengerHostBindings {
     }
 
     static String methodName(MessengerBuild build, String owner, String name) {
+        if (build == MessengerBuild.MESSENGER_588_1) return release5881Method(owner, name);
         if (build == MessengerBuild.MESSENGER_588) return release588Method(owner, name);
         if (build == MessengerBuild.MESSENGER_586) return releaseMethod(owner, name);
         if (build == MessengerBuild.MESSENGER_586_REBUILD) return rebuildMethod(owner, name);
         return name;
+    }
+
+    private static String release5881Method(String owner, String name) {
+        return switch (owner + "." + name) {
+            case "X.BoE.AY8" -> "Ae8";
+            case "X.6Bf.Cha", "X.4w8.Cha" -> "DIX";
+            case "X.6Bf.D9Z", "X.4w8.D9Z" -> "DuZ";
+            case "X.Arn.AMG" -> "ARi";
+            case "X.2ks.CQ1" -> "CrC";
+            case "X.BlC.A0T" -> "A0H";
+            case "X.BlC.A0U" -> "A0I";
+            case "X.Ayy.Afu" -> "Afv";
+            case "X.BFb.BTL" -> "BTQ";
+            case "X.Paj.EFm" -> "EFv";
+            default -> name;
+        };
     }
 
     private static String release588Method(String owner, String name) {
