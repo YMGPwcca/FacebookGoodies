@@ -8,13 +8,13 @@ An LSPosed module with feed filters, video downloads and privacy switches for th
 - LSPosed
 - A supported Facebook or Messenger build, listed in [Supported host builds](SUPPORT.md)
 
-The module checks the installed version name and version code against that list. Its tab displays **Supported** for a listed build. An unlisted build runs with its hooks disabled, and its tab reports **Unsupported**. See [Supported host builds](SUPPORT.md) for exact versions and device test coverage.
+The module checks the installed version name and version code against that list. Its tab displays **Supported** for a listed build. An unlisted build runs with its hooks disabled, and its tab reports **Unsupported**.
 
 ## Setup
 
-1. Install the FacebookGoodies APK.
+1. Download and install the signed APK from [GitHub Releases](https://github.com/YMGPwcca/FacebookGoodies/releases/latest). Version 1.5.2 adds support for Messenger 588.1.0.66.98.
 2. In LSPosed, enable FacebookGoodies and add Facebook, Messenger, or both to its scope.
-3. Restart each app you added.
+3. Restart each app you added. Also restart the host apps after updating the module so they load the new hooks.
 4. Open FacebookGoodies and use the Facebook or Messenger tab for that app's switches and diagnostics.
 
 ## Facebook
@@ -55,7 +55,7 @@ The module checks the installed version name and version code against that list.
 
 - Feed filters apply after a feed refresh. The top Stories switch needs a Facebook restart.
 - Each tab has a restart button for its host app. Restarting from the module requires root access.
-- Diagnostics counts actions in the current app process, so the numbers reset when that app restarts and do not count unique posts or messages.
+- Diagnostics counts actions in the current app process. The numbers reset when that app restarts.
 
 ## Build
 

@@ -13,7 +13,7 @@ The Gradle Wrapper downloads and verifies Gradle 8.14.3. The first build also re
 Windows PowerShell:
 
 ```powershell
-.\gradlew.bat :app:assembleDebug
+java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain :app:assembleDebug
 ```
 
 Linux or macOS:
@@ -42,7 +42,18 @@ adb shell am instrument -w ymg.pwcca.facebookgoodies.test/ymg.pwcca.facebookgood
 
 The platform-only runner checks attach-time application-context retention, manifest parsing, unchanged encoded video and audio samples after muxing, 1080p output, VP9 MP4 fallback with audio, module-loader mapping, silent-video handling, cancellation and MediaStore cleanup.
 
-It creates and removes synthetic downloads in `Downloads/FacebookGoodies`, so use a disposable emulator. Fixtures ship only in test artifacts. The native Facebook sidebar and signed CDN downloads still need a check in a supported Facebook build on a device. The VP9 JVM test also covers fragmented MP4; the emulator's native reader rejects that generated fixture, so the end-to-end test uses a regular VP9 MP4.
+It creates and removes synthetic downloads in `Downloads/FacebookGoodies`, so use a disposable emulator. Fixtures ship only in test artifacts. Add `-e mappingOnly true` after `-w` to check the provider's MP4 mapping and verify that the portable muxer preserves audio and video samples for both fragmented and unfragmented VP9 input.
+
+## Confirm hook startup on a device
+
+Install the signed release with `adb install -r <path-to-release.apk>`, then restart Facebook and Messenger. To inspect the module's reports over ADB, run:
+
+```sh
+adb shell content call --uri content://ymg.pwcca.facebookgoodies.settings --method status --arg facebook
+adb shell content call --uri content://ymg.pwcca.facebookgoodies.settings --method status --arg messenger
+```
+
+Check that the report updated after the restart. On v1.5.2, Facebook 588.0.0.42.55 reported 46 hooks and Messenger 588.1.0.66.98 reported 37, with zero errors in both reports. The Messenger count includes the Meta AI button hook when **Hide Meta AI button** is enabled at startup.
 
 ## Publish a release
 
